@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Doctor Management</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 550px;
+            box-shadow: 0 0 8px #ccc;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 9px;
+            margin-top: 5px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 9px 15px;
+            margin: 3px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #999;
+            text-align: left;
+        }
+
+        th {
+            background: #d9edf7;
+        }
+
+        #doctorDetails {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #555;
+            width: 350px;
+            z-index: 1000;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <script>
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "doctor"
+    ) {
+        window.location.href = "login.html";
+    }
+</script>
+
+<h1>👨‍⚕️ Doctor Management</h1>
+
+<a href="index.html">🏠 Dashboard</a>
+
+<hr>
+
+
+<h2>➕ Add Doctor</h2>
+
+<form onsubmit="event.preventDefault(); handleDoctorSubmit();">
+
+    <label>Doctor Name:</label>
+
+    <input
+        type="text"
+        id="doctorName"
+        required
+    >
+
+
+    <label>Specialization:</label>
+
+    <input
+        type="text"
+        id="specialization"
+        placeholder="Example: Cardiology"
+        required
+    >
+
+
+    <label>Phone:</label>
+
+    <input
+        type="tel"
+        id="phone"
+        required
+    >
+
+
+    <label>Email:</label>
+
+    <input
+        type="email"
+        id="email"
+        required
+    >
+
+
+    <label>Experience:</label>
+
+    <input
+        type="text"
+        id="experience"
+        placeholder="Example: 5 years"
+        required
+    >
+
+
+    <label>Available Time:</label>
+
+    <input
+        type="text"
+        id="availableTime"
+        placeholder="Example: 9 AM - 1 PM"
+        required
+    >
+
+
+    <button
+        type="submit"
+        id="doctorSubmitButton"
+    >
+        ➕ Add Doctor
+    </button>
+
+
+    <button
+        type="button"
+        id="cancelEditButton"
+        onclick="cancelDoctorEdit()"
+        style="display:none;"
+    >
+        ✖️ Cancel Edit
+    </button>
+
+</form>
+
+
+<p>
+
+    👨‍⚕️ <b>Total Doctors:</b>
+
+    <span id="doctorTotal">0</span>
+
+</p>
+
+
+<h2>📋 Doctor List</h2>
+
+<table>
+
+    <thead>
+
+        <tr>
+
+            <th>Name</th>
+
+            <th>Specialization</th>
+
+            <th>Phone</th>
+
+            <th>Email</th>
+
+            <th>Experience</th>
+
+            <th>Available Time</th>
+
+            <th>Action</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody id="doctorList"></tbody>
+
+</table>
+
+
+<!-- VIEW DOCTOR POPUP -->
+
+<div id="doctorDetails">
+
+    <h2>👨‍⚕️ Doctor Details</h2>
+
+    <p>
+        <b>Name:</b>
+        <span id="viewDoctorName"></span>
+    </p>
+
+    <p>
+        <b>Specialization:</b>
+        <span id="viewDoctorSpecialization"></span>
+    </p>
+
+    <p>
+        <b>Phone:</b>
+        <span id="viewDoctorPhone"></span>
+    </p>
+
+    <p>
+        <b>Email:</b>
+        <span id="viewDoctorEmail"></span>
+    </p>
+
+    <p>
+        <b>Experience:</b>
+        <span id="viewDoctorExperience"></span>
+    </p>
+
+    <p>
+        <b>Available Time:</b>
+        <span id="viewDoctorAvailableTime"></span>
+    </p>
+
+    <button
+        type="button"
+        onclick="closeDoctorDetails()"
+    >
+        ✖️ Close
+    </button>
+
+</div>
+
+
+<script>
+
+let editingDoctorIndex = -1;
+
+
+// ==========================================
+// HANDLE FORM
+// ==========================================
+
+function handleDoctorSubmit() {
+
+    if (editingDoctorIndex === -1) {
+
+        addDoctor();
+
+    } else {
+
+        updateDoctor();
+
+    }
+
+}
+
+
+// ==========================================
+// ADD DOCTOR
+// ==========================================
+
+function addDoctor() {
+
+    let name =
+        document.getElementById("doctorName").value.trim();
+
+    let specialization =
+        document.getElementById("specialization").value.trim();
+
+    let phone =
+        document.getElementById("phone").value.trim();
+
+    let email =
+        document.getElementById("email").value.trim();
+
+    let experience =
+        document.getElementById("experience").value.trim();
+
+    let availableTime =
+        document.getElementById("availableTime").value.trim();
+
+
+    if (
+        name === "" ||
+        specialization === "" ||
+        phone === "" ||
+        email === "" ||
+        experience === "" ||
+        availableTime === ""
+    ) {
+
+        alert("Please fill all doctor details!");
+
+        return;
+    }
+
+
+    let doctors =
+        JSON.parse(
+            localStorage.getItem("doctors")
+        ) || [];
+
+
+    doctors.push({
+
+        name: name,
+
+        specialization: specialization,
+
+        phone: phone,
+
+        email: email,
+
+        experience: experience,
+
+        availableTime: availableTime
+
+    });
+
+
+    localStorage.setItem(
+        "doctors",
+        JSON.stringify(doctors)
+    );
+
+
+    resetDoctorForm();
+
+    displayDoctors();
+
+
+    alert("👨‍⚕️ Doctor added successfully!");
+
+}
+
+
+// ==========================================
+// DISPLAY DOCTORS
+// ==========================================
+
+function displayDoctors() {
+
+    let doctors =
+        JSON.parse(
+            localStorage.getItem("doctors")
+        ) || [];
+
+
+    document.getElementById(
+        "doctorTotal"
+    ).textContent =
+        doctors.length;
+
+
+    let list =
+        document.getElementById(
+            "doctorList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    doctors.forEach(
+        function(doctor, index) {
+
+            let row =
+                list.insertRow();
+
+
+            row.insertCell(0).textContent =
+                doctor.name || "";
+
+
+            row.insertCell(1).textContent =
+                doctor.specialization || "";
+
+
+            row.insertCell(2).textContent =
+                doctor.phone || "";
+
+
+            row.insertCell(3).textContent =
+                doctor.email || "";
+
+
+            row.insertCell(4).textContent =
+                doctor.experience || "";
+
+
+            row.insertCell(5).textContent =
+                doctor.availableTime || "";
+
+
+            let actionCell =
+                row.insertCell(6);
+
+
+            actionCell.innerHTML =
+
+                '<button type="button" onclick="viewDoctor(' +
+                index +
+                ')">👁️ View</button> ' +
+
+                '<button type="button" onclick="editDoctor(' +
+                index +
+                ')">✏️ Edit</button> ' +
+
+                '<button type="button" onclick="deleteDoctor(' +
+                index +
+                ')">🗑️ Delete</button>';
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// VIEW DOCTOR
+// ==========================================
+
+function viewDoctor(index) {
+
+    let doctors =
+        JSON.parse(
+            localStorage.getItem("doctors")
+        ) || [];
+
+
+    let doctor =
+        doctors[index];
+
+
+    if (!doctor) {
+
+        alert("Doctor not found!");
+
+        return;
+    }
+
+
+    document.getElementById(
+        "viewDoctorName"
+    ).textContent =
+        doctor.name || "";
+
+
+    document.getElementById(
+        "viewDoctorSpecialization"
+    ).textContent =
+        doctor.specialization || "";
+
+
+    document.getElementById(
+        "viewDoctorPhone"
+    ).textContent =
+        doctor.phone || "";
+
+
+    document.getElementById(
+        "viewDoctorEmail"
+    ).textContent =
+        doctor.email || "";
+
+
+    document.getElementById(
+        "viewDoctorExperience"
+    ).textContent =
+        doctor.experience || "";
+
+
+    document.getElementById(
+        "viewDoctorAvailableTime"
+    ).textContent =
+        doctor.availableTime || "";
+
+
+    document.getElementById(
+        "doctorDetails"
+    ).style.display =
+        "block";
+
+}
+
+
+// ==========================================
+// CLOSE VIEW
+// ==========================================
+
+function closeDoctorDetails() {
+
+    document.getElementById(
+        "doctorDetails"
+    ).style.display =
+        "none";
+
+}
+
+
+// ==========================================
+// EDIT DOCTOR
+// ==========================================
+
+function editDoctor(index) {
+
+    let doctors =
+        JSON.parse(
+            localStorage.getItem("doctors")
+        ) || [];
+
+
+    let doctor =
+        doctors[index];
+
+
+    if (!doctor) {
+
+        alert("Doctor not found!");
+
+        return;
+    }
+
+
+    document.getElementById("doctorName").value =
+        doctor.name || "";
+
+
+    document.getElementById("specialization").value =
+        doctor.specialization || "";
+
+
+    document.getElementById("phone").value =
+        doctor.phone || "";
+
+
+    document.getElementById("email").value =
+        doctor.email || "";
+
+
+    document.getElementById("experience").value =
+        doctor.experience || "";
+
+
+    document.getElementById("availableTime").value =
+        doctor.availableTime || "";
+
+
+    editingDoctorIndex = index;
+
+
+    document.getElementById(
+        "doctorSubmitButton"
+    ).textContent =
+        "✏️ Update Doctor";
+
+
+    document.getElementById(
+        "cancelEditButton"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+// ==========================================
+// UPDATE DOCTOR
+// ==========================================
+
+function updateDoctor() {
+
+    let doctors =
+        JSON.parse(
+            localStorage.getItem("doctors")
+        ) || [];
+
+
+    if (!doctors[editingDoctorIndex]) {
+
+        alert("Doctor not found!");
+
+        return;
+    }
+
+
+    let name =
+        document.getElementById("doctorName").value.trim();
+
+    let specialization =
+        document.getElementById("specialization").value.trim();
+
+    let phone =
+        document.getElementById("phone").value.trim();
+
+    let email =
+        document.getElementById("email").value.trim();
+
+    let experience =
+        document.getElementById("experience").value.trim();
+
+    let availableTime =
+        document.getElementById("availableTime").value.trim();
+
+
+    if (
+        name === "" ||
+        specialization === "" ||
+        phone === "" ||
+        email === "" ||
+        experience === "" ||
+        availableTime === ""
+    ) {
+
+        alert("Please fill all doctor details!");
+
+        return;
+    }
+
+
+    doctors[editingDoctorIndex] = {
+
+        name: name,
+
+        specialization: specialization,
+
+        phone: phone,
+
+        email: email,
+
+        experience: experience,
+
+        availableTime: availableTime
+
+    };
+
+
+    localStorage.setItem(
+        "doctors",
+        JSON.stringify(doctors)
+    );
+
+
+    resetDoctorForm();
+
+    displayDoctors();
+
+
+    alert("✏️ Doctor updated successfully!");
+
+}
+
+
+// ==========================================
+// CANCEL EDIT
+// ==========================================
+
+function cancelDoctorEdit() {
+
+    resetDoctorForm();
+
+}
+
+
+// ==========================================
+// RESET FORM
+// ==========================================
+
+function resetDoctorForm() {
+
+    document.getElementById("doctorName").value = "";
+
+    document.getElementById("specialization").value = "";
+
+    document.getElementById("phone").value = "";
+
+    document.getElementById("email").value = "";
+
+    document.getElementById("experience").value = "";
+
+    document.getElementById("availableTime").value = "";
+
+
+    editingDoctorIndex = -1;
+
+
+    document.getElementById(
+        "doctorSubmitButton"
+    ).textContent =
+        "➕ Add Doctor";
+
+
+    document.getElementById(
+        "cancelEditButton"
+    ).style.display =
+        "none";
+
+}
+
+
+// ==========================================
+// DELETE DOCTOR
+// ==========================================
+
+function deleteDoctor(index) {
+
+    let doctors =
+        JSON.parse(
+            localStorage.getItem("doctors")
+        ) || [];
+
+
+    if (!doctors[index]) {
+
+        alert("Doctor not found!");
+
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this doctor?"
+        )
+    ) {
+
+        return;
+    }
+
+
+    doctors.splice(index, 1);
+
+
+    localStorage.setItem(
+        "doctors",
+        JSON.stringify(doctors)
+    );
+
+
+    displayDoctors();
+
+
+    alert("🗑️ Doctor deleted successfully!");
+
+}
+
+
+// ==========================================
+// LOAD DOCTORS
+// ==========================================
+
+displayDoctors();
+
+</script>
+
+</body>
+</html>

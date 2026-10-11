@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Health Insurance</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+    // Protect Patient Insurance page
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "patient"
+    ) {
+        window.location.href = "login.html";
+    }
+</script>
+
+<header>
+    <h1>🛡️ Health Insurance</h1>
+    <p>Patient insurance information</p>
+</header>
+
+<nav>
+    <a href="patient-dashboard.html">🏠 Dashboard</a>
+    <a href="patient.html">👤 My Details</a>
+    <a href="appointment.html">📅 Appointments</a>
+    <a href="prescription.html">💊 Prescriptions</a>
+    <a href="patient-notifications.html">🔔 Notifications</a>
+    <a href="patient-meeting.html">📹 Online Meeting</a>
+    <a href="patient-insurance.html">🛡️ Insurance</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</nav>
+
+<main>
+
+    <h2>🛡️ My Health Insurance</h2>
+
+    <div class="dashboard-box">
+
+        <h3>📋 Insurance Details</h3>
+
+        <p><strong>Insurance Provider:</strong> ABC Health Insurance</p>
+
+        <p><strong>Policy Number:</strong> POL-2026-001</p>
+
+        <p><strong>Policy Status:</strong> Active ✅</p>
+
+        <p><strong>Coverage:</strong> Hospitalization and Medical Treatment</p>
+
+        <p><strong>Valid Until:</strong> 31 December 2026</p>
+
+    </div>
+
+    <div class="dashboard-box">
+
+        <h3>💰 Coverage Information</h3>
+
+        <p>
+            Your insurance information can be reviewed before
+            hospital treatment.
+        </p>
+
+        <button onclick="showInsurance()">
+            📄 View Insurance Status
+        </button>
+
+    </div>
+
+</main>
+
+<script>
+    function showInsurance() {
+        alert("Insurance policy is currently active.");
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        alert("Logged out successfully");
+        window.location.href = "login.html";
+    }
+</script>
+
+</body>
+</html>

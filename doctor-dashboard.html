@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Doctor Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+
+        /* ===== PAGE LAYOUT ===== */
+
+        body {
+    margin: 0;
+    background: linear-gradient(
+        135deg,
+        #fff3e0,
+        #e8eaf6,
+        #fce4ec
+    );
+    min-height: 100vh;
+}
+
+        header {
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        header h1 {
+            margin-bottom: 8px;
+        }
+
+
+        /* ===== NAVIGATION ===== */
+
+        nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px;
+        }
+
+        nav a {
+            text-decoration: none;
+        }
+
+
+        /* ===== MAIN CONTENT ===== */
+
+        main {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+
+        /* ===== DASHBOARD BOX ===== */
+
+        .dashboard-box {
+
+            text-align: center;
+
+            margin: 0 auto 25px auto;
+
+            padding: 25px;
+
+            max-width: 650px;
+
+            border-radius: 12px;
+
+        }
+
+
+        /* ===== DASHBOARD BUTTON ===== */
+
+        .dashboard-button {
+
+            display: inline-block;
+
+            padding: 13px 25px;
+
+            margin-top: 10px;
+
+            text-decoration: none;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+
+            background: #007bff;
+
+            color: white;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+
+        }
+
+
+        .dashboard-button:hover {
+
+            background: #0056b3;
+
+            transform: scale(1.03);
+
+        }
+
+
+        /* ===== MOBILE VIEW ===== */
+
+        @media (max-width: 600px) {
+
+            main {
+                padding: 10px;
+            }
+
+            .dashboard-box {
+                padding: 20px;
+            }
+
+            .dashboard-button {
+                width: 80%;
+            }
+
+            nav a {
+                margin: 4px;
+            }
+
+        }
+.welcome-header {
+    text-align: center;
+    margin: 25px auto;
+    padding: 35px 20px;
+    max-width: 800px;
+    border-radius: 20px;
+
+    background: linear-gradient(
+        135deg,
+        #b2ebf2,
+        #bbdefb,
+        #e1bee7
+    );
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.welcome-header h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.welcome-header p {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+}
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===== DOCTOR LOGIN CHECK ===== -->
+
+<script>
+
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "doctor"
+    ) {
+
+        window.location.href = "login.html";
+
+    }
+
+</script>
+
+
+<!-- ===== HEADER ===== -->
+
+<header class="welcome-header">
+    <h1>👨‍⚕️ Doctor Dashboard</h1>
+    <p id="doctorWelcome">Welcome to the Doctor Dashboard</p>
+</header>
+
+<nav>
+
+    <a href="doctor-dashboard.html">
+        🏠 Dashboard
+    </a>
+
+    <a href="doctor.html">
+        👨‍⚕️ Doctor
+    </a>
+
+    <a href="patient.html">
+        👤 Patients
+    </a>
+
+    <a href="appointment.html">
+        📅 Appointments
+    </a>
+
+    <a href="prescription.html">
+        💊 Prescriptions
+    </a>
+
+    <a href="doctor-alerts.html">
+        🚨 Emergency Alerts
+    </a>
+
+    <a href="#" onclick="logout()">
+        🚪 Logout
+    </a>
+
+</nav>
+
+
+<!-- ===== MAIN DASHBOARD ===== -->
+
+<main>
+
+
+    <!-- PATIENT RECORDS -->
+
+    <div class="dashboard-box">
+
+        <h2>👤 Patient Records</h2>
+
+        <p>
+            View and manage patient information.
+        </p>
+
+        <a
+            href="patient.html"
+            class="dashboard-button">
+
+            👤 View Patient Records
+
+        </a>
+
+    </div>
+
+
+    <!-- APPOINTMENTS -->
+
+    <div class="dashboard-box">
+
+        <h2>📅 Appointments</h2>
+
+        <p>
+            View patient appointments.
+        </p>
+
+        <a
+            href="appointment.html"
+            class="dashboard-button">
+
+            📅 View Appointments
+
+        </a>
+
+    </div>
+
+
+    <!-- PRESCRIPTIONS -->
+
+    <div class="dashboard-box">
+
+        <h2>💊 Prescriptions</h2>
+
+        <p>
+            View and manage prescriptions.
+        </p>
+
+        <a
+            href="prescription.html"
+            class="dashboard-button">
+
+            💊 View Prescriptions
+
+        </a>
+
+    </div>
+
+
+    <!-- NOTIFICATIONS -->
+
+    <div class="dashboard-box">
+
+        <h2>🔔 Notifications</h2>
+
+        <p id="doctorNotification">
+            ✅ No new notifications
+        </p>
+
+        <a
+            href="doctor-alerts.html"
+            class="dashboard-button">
+
+            🔔 View Notifications
+
+        </a>
+
+    </div>
+
+
+    <!-- EMERGENCY ALERTS -->
+
+    <div class="dashboard-box">
+
+        <h2>🚨 Emergency Alerts</h2>
+
+        <p id="doctorEmergencyAlert">
+            ✅ No emergency alerts
+        </p>
+
+        <a
+            href="doctor-alerts.html"
+            class="dashboard-button">
+
+            🚨 View Emergency Alerts
+
+        </a>
+
+    </div>
+
+
+    <!-- ONLINE CONSULTATION -->
+
+    <div class="dashboard-box">
+
+        <h2>📹 Online Consultation</h2>
+
+        <p>
+            Conduct online patient consultations.
+        </p>
+
+        <a
+            href="patient-meeting.html"
+            class="dashboard-button">
+
+            📹 Open Online Meeting
+
+        </a>
+
+    </div>
+
+
+    <!-- HOME MONITORING -->
+
+    <div class="dashboard-box">
+
+        <h2>❤️ Home Health Monitoring</h2>
+
+        <p>
+            View patient monitoring information
+            and emergency alerts.
+        </p>
+
+        <a
+            href="doctor-alerts.html"
+            class="dashboard-button">
+
+            ❤️ View Monitoring Alerts
+
+        </a>
+
+    </div>
+
+
+    <!-- MONITORING HISTORY -->
+
+    <div class="dashboard-box">
+
+        <h2>📊 Monitoring History</h2>
+
+        <p>
+            View previous patient health
+            monitoring readings.
+        </p>
+
+        <a
+            href="doctor-monitoring-history.html"
+            class="dashboard-button">
+
+            📊 View Monitoring History
+
+        </a>
+
+    </div>
+
+
+</main>
+
+
+<!-- ===== JAVASCRIPT ===== -->
+
+<script>
+
+
+    // 🔔 Load Doctor Notification
+
+    function loadDoctorNotification() {
+
+        let notification =
+            localStorage.getItem(
+                "doctorNotification"
+            );
+
+
+        if (notification) {
+
+            document.getElementById(
+                "doctorNotification"
+            ).innerText = notification;
+
+        }
+
+        else {
+
+            document.getElementById(
+                "doctorNotification"
+            ).innerText =
+                "✅ No new notifications";
+
+        }
+
+    }
+
+
+    // 🚨 Load Emergency Alert
+
+    function loadEmergencyAlert() {
+
+        let emergencyAlert =
+            localStorage.getItem(
+                "doctorEmergencyAlert"
+            );
+
+
+        if (emergencyAlert) {
+
+            document.getElementById(
+                "doctorEmergencyAlert"
+            ).innerText =
+                emergencyAlert;
+
+        }
+
+        else {
+
+            document.getElementById(
+                "doctorEmergencyAlert"
+            ).innerText =
+                "✅ No emergency alerts";
+
+        }
+
+    }
+
+
+    // 🚪 Logout
+
+    function logout() {
+
+        sessionStorage.clear();
+
+        alert("Logged out successfully");
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    // 🔄 Load Dashboard Data
+
+    window.onload = function () {
+
+        loadDoctorNotification();
+
+        loadEmergencyAlert();
+
+    };
+
+
+</script>
+
+
+</body>
+
+</html>

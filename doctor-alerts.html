@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Doctor Emergency Alerts</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+    // 🔒 Doctor-only access
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "doctor"
+    ) {
+        window.location.href = "login.html";
+    }
+</script>
+
+
+<header>
+    <h1>🚨 Emergency Alerts</h1>
+    <p>Patient Monitoring Alerts</p>
+</header>
+
+
+<nav>
+    <a href="doctor-dashboard.html">🏠 Dashboard</a>
+    <a href="doctor-alerts.html">🚨 Emergency Alerts</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</nav>
+
+
+<main>
+
+    <!-- EMERGENCY ALERT -->
+    <div class="dashboard-box">
+
+        <h2>🚨 Patient Emergency Alert</h2>
+
+        <p id="alertMessage">
+            Loading alert...
+        </p>
+
+        <p>
+            🏥 Alert Source:
+            <strong>Home Health Monitoring</strong>
+        </p>
+
+        <p>
+            📡 Status:
+            <strong id="alertStatus">Checking...</strong>
+        </p>
+
+    </div>
+    <br>
+
+<button type="button" onclick="clearAlerts()">
+    🧹 Clear Alerts
+</button>
+
+
+    <!-- HEALTH READINGS -->
+    <div class="dashboard-box">
+
+        <h2>📊 Patient Health Readings</h2>
+
+        <p>
+            ❤️ Heart Rate:
+            <strong id="doctorHeartRate">--</strong> BPM
+        </p>
+
+        <p>
+            🌡️ Temperature:
+            <strong id="doctorTemperature">--</strong> °C
+        </p>
+
+        <p>
+            🫁 Oxygen Level:
+            <strong id="doctorOxygen">--</strong> %
+        </p>
+
+    </div>
+
+
+    <!-- MONITORING STATUS -->
+    <div class="dashboard-box">
+
+        <h2>📡 Monitoring Status</h2>
+
+        <p>
+            <strong id="monitoringStatus">
+                Checking...
+            </strong>
+        </p>
+
+    </div>
+
+</main>
+
+
+<script>
+
+    // 🚨 Load Emergency Alert and Health Readings
+    function loadAlert() {
+
+        // Get emergency alert
+        let message =
+            localStorage.getItem("doctorEmergencyAlert");
+
+
+        if (message) {
+
+            document.getElementById("alertMessage").innerText =
+                message;
+
+            document.getElementById("alertStatus").innerText =
+                "🚨 Alert Received (Demo)";
+
+        } else {
+
+            document.getElementById("alertMessage").innerText =
+                "✅ No emergency alerts";
+
+            document.getElementById("alertStatus").innerText =
+                "No Active Alert";
+
+        }
+
+
+        // Get saved health readings
+        let heartRate =
+            localStorage.getItem("doctorHeartRate");
+
+        let temperature =
+            localStorage.getItem("doctorTemperature");
+
+        let oxygen =
+            localStorage.getItem("doctorOxygen");
+
+
+        // Display Heart Rate
+        if (heartRate) {
+
+            document.getElementById("doctorHeartRate").innerText =
+                heartRate;
+
+        } else {
+
+            document.getElementById("doctorHeartRate").innerText =
+                "--";
+
+        }
+
+
+        // Display Temperature
+        if (temperature) {
+
+            document.getElementById("doctorTemperature").innerText =
+                temperature;
+
+        } else {
+
+            document.getElementById("doctorTemperature").innerText =
+                "--";
+
+        }
+
+
+        // Display Oxygen
+        if (oxygen) {
+
+            document.getElementById("doctorOxygen").innerText =
+                oxygen;
+
+        } else {
+
+            document.getElementById("doctorOxygen").innerText =
+                "--";
+
+        }
+
+
+        // Monitoring status
+        if (heartRate && temperature && oxygen) {
+
+            document.getElementById("monitoringStatus").innerText =
+                "🟢 Monitoring data received successfully (Demo)";
+
+        } else {
+
+            document.getElementById("monitoringStatus").innerText =
+                "⚪ No monitoring data available";
+
+        }
+
+    }
+
+
+    // 🚪 Logout
+    function logout() {
+
+        sessionStorage.clear();
+
+        alert("Logged out successfully");
+
+        window.location.href = "login.html";
+
+    }
+
+
+    // 🔄 Load data when page opens
+    window.onload = function () {
+
+        loadAlert();
+
+    };
+function clearAlerts() {
+
+    localStorage.removeItem("doctorEmergencyAlert");
+    localStorage.removeItem("doctorNotification");
+    localStorage.removeItem("doctorHeartRate");
+    localStorage.removeItem("doctorTemperature");
+    localStorage.removeItem("doctorOxygen");
+
+    document.getElementById("alertMessage").innerText =
+        "✅ No emergency alerts";
+
+    document.getElementById("alertStatus").innerText =
+        "No Active Alert";
+
+    document.getElementById("doctorHeartRate").innerText =
+        "--";
+
+    document.getElementById("doctorTemperature").innerText =
+        "--";
+
+    document.getElementById("doctorOxygen").innerText =
+        "--";
+
+    document.getElementById("monitoringStatus").innerText =
+        "⚪ No monitoring data available";
+
+    alert("🧹 Demo alerts cleared successfully.");
+}
+</script>
+
+</body>
+
+</html>

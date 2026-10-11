@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Appointment Management</title>
+    <style>
+
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f7fb;
+}
+
+.header {
+    background: #1976d2;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    padding: 25px;
+}
+
+form {
+    background: white;
+    padding: 25px;
+    max-width: 600px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px #ccc;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    margin: 4px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #999;
+}
+
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #999;
+    text-align: center;
+}
+
+th {
+    background: #d9edf7;
+}
+
+#appointmentDetails {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    width: 350px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #555;
+    z-index: 1000;
+}
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>📅 Appointment Management</h1>
+
+    <a href="index.html">🏠 Dashboard</a>
+
+    <hr>
+
+
+    <!-- BOOK APPOINTMENT -->
+
+    <h2>📅 Book Appointment</h2>
+
+    <form onsubmit="event.preventDefault(); handleAppointmentSubmit();">
+
+        <label>Patient Name:</label>
+
+        <input
+            type="text"
+            id="patient"
+            required
+        >
+
+
+        <label>Doctor Name:</label>
+
+        <input
+            type="text"
+            id="doctor"
+            required
+        >
+
+
+        <label>Appointment Date:</label>
+
+        <input
+            type="date"
+            id="date"
+            required
+        >
+
+
+        <label>Appointment Time:</label>
+
+        <input
+            type="time"
+            id="time"
+            required
+        >
+
+
+        <label>Reason:</label>
+
+        <textarea
+            id="reason"
+            required
+        ></textarea>
+
+
+        <button
+            type="submit"
+            id="appointmentSubmitButton"
+        >
+            📅 Book Appointment
+        </button>
+
+
+        <button
+            type="button"
+            id="cancelAppointmentEditButton"
+            onclick="cancelAppointmentEdit()"
+            style="display:none;"
+        >
+            ✖️ Cancel Edit
+        </button>
+
+    </form>
+
+
+    <!-- TOTAL -->
+
+    <p>
+
+        📅 <b>Total Appointments:</b>
+
+        <span id="appointmentTotal">0</span>
+
+    </p>
+
+
+    <!-- APPOINTMENT LIST -->
+
+    <h2>📋 Appointment List</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Patient</th>
+
+                <th>Doctor</th>
+
+                <th>Date</th>
+
+                <th>Time</th>
+
+                <th>Reason</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="appointmentList"></tbody>
+
+    </table>
+
+
+    <!-- VIEW APPOINTMENT POPUP -->
+
+    <div id="appointmentDetails">
+
+        <h2>📅 Appointment Details</h2>
+
+
+        <p>
+            <b>Patient:</b>
+            <span id="viewAppointmentPatient"></span>
+        </p>
+
+
+        <p>
+            <b>Doctor:</b>
+            <span id="viewAppointmentDoctor"></span>
+        </p>
+
+
+        <p>
+            <b>Date:</b>
+            <span id="viewAppointmentDate"></span>
+        </p>
+
+
+        <p>
+            <b>Time:</b>
+            <span id="viewAppointmentTime"></span>
+        </p>
+
+
+        <p>
+            <b>Reason:</b>
+            <span id="viewAppointmentReason"></span>
+        </p>
+
+
+        <button
+            type="button"
+            onclick="closeAppointmentDetails()"
+        >
+            ✖️ Close
+        </button>
+
+    </div>
+
+
+
+<script>
+
+
+// ==========================================
+// EDITING INDEX
+// ==========================================
+
+let editingAppointmentIndex = -1;
+
+
+
+// ==========================================
+// HANDLE FORM
+// ==========================================
+
+function handleAppointmentSubmit() {
+
+    if (editingAppointmentIndex === -1) {
+
+        addAppointment();
+
+    } else {
+
+        updateAppointment();
+
+    }
+
+}
+
+
+
+// ==========================================
+// ADD APPOINTMENT
+// ==========================================
+
+function addAppointment() {
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let time =
+        document.getElementById("time").value;
+
+    let reason =
+        document.getElementById("reason").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        date === "" ||
+        time === "" ||
+        reason === ""
+    ) {
+
+        alert("Please fill all appointment details!");
+
+        return;
+    }
+
+
+    let appointments =
+        JSON.parse(
+            localStorage.getItem("appointments")
+        ) || [];
+
+
+    appointments.push({
+
+        patient: patient,
+
+        doctor: doctor,
+
+        date: date,
+
+        time: time,
+
+        reason: reason
+
+    });
+
+
+    localStorage.setItem(
+        "appointments",
+        JSON.stringify(appointments)
+    );
+
+
+    resetAppointmentForm();
+
+    displayAppointments();
+
+
+    alert("📅 Appointment added successfully!");
+
+}
+
+
+
+// ==========================================
+// DISPLAY APPOINTMENTS
+// ==========================================
+
+function displayAppointments() {
+
+    let appointments =
+        JSON.parse(
+            localStorage.getItem("appointments")
+        ) || [];
+
+
+    document.getElementById(
+        "appointmentTotal"
+    ).textContent = appointments.length;
+
+
+    let list =
+        document.getElementById(
+            "appointmentList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    appointments.forEach(
+        function(appointment, index) {
+
+
+            let row =
+                list.insertRow();
+
+
+            row.insertCell(0).textContent =
+                appointment.patient || "";
+
+
+            row.insertCell(1).textContent =
+                appointment.doctor || "";
+
+
+            row.insertCell(2).textContent =
+                appointment.date || "";
+
+
+            row.insertCell(3).textContent =
+                appointment.time || "";
+
+
+            row.insertCell(4).textContent =
+                appointment.reason || "";
+
+
+            let actionCell =
+                row.insertCell(5);
+
+
+            actionCell.innerHTML =
+
+                '<button type="button" onclick="viewAppointment(' +
+                index +
+                ')">👁️ View</button> ' +
+
+                '<button type="button" onclick="editAppointment(' +
+                index +
+                ')">✏️ Edit</button> ' +
+
+                '<button type="button" onclick="deleteAppointment(' +
+                index +
+                ')">🗑️ Delete</button>';
+
+        }
+    );
+
+}
+
+
+
+// ==========================================
+// VIEW APPOINTMENT
+// ==========================================
+
+function viewAppointment(index) {
+
+    let appointments =
+        JSON.parse(
+            localStorage.getItem("appointments")
+        ) || [];
+
+
+    let appointment =
+        appointments[index];
+
+
+    if (!appointment) {
+
+        alert("Appointment not found!");
+
+        return;
+    }
+
+
+    document.getElementById(
+        "viewAppointmentPatient"
+    ).textContent =
+        appointment.patient || "";
+
+
+    document.getElementById(
+        "viewAppointmentDoctor"
+    ).textContent =
+        appointment.doctor || "";
+
+
+    document.getElementById(
+        "viewAppointmentDate"
+    ).textContent =
+        appointment.date || "";
+
+
+    document.getElementById(
+        "viewAppointmentTime"
+    ).textContent =
+        appointment.time || "";
+
+
+    document.getElementById(
+        "viewAppointmentReason"
+    ).textContent =
+        appointment.reason || "";
+
+
+    document.getElementById(
+        "appointmentDetails"
+    ).style.display = "block";
+
+}
+
+
+
+// ==========================================
+// CLOSE VIEW
+// ==========================================
+
+function closeAppointmentDetails() {
+
+    document.getElementById(
+        "appointmentDetails"
+    ).style.display = "none";
+
+}
+
+
+
+// ==========================================
+// EDIT APPOINTMENT
+// ==========================================
+
+function editAppointment(index) {
+
+    let appointments =
+        JSON.parse(
+            localStorage.getItem("appointments")
+        ) || [];
+
+
+    let appointment =
+        appointments[index];
+
+
+    if (!appointment) {
+
+        alert("Appointment not found!");
+
+        return;
+    }
+
+
+    document.getElementById("patient").value =
+        appointment.patient || "";
+
+
+    document.getElementById("doctor").value =
+        appointment.doctor || "";
+
+
+    document.getElementById("date").value =
+        appointment.date || "";
+
+
+    document.getElementById("time").value =
+        appointment.time || "";
+
+
+    document.getElementById("reason").value =
+        appointment.reason || "";
+
+
+    editingAppointmentIndex = index;
+
+
+    document.getElementById(
+        "appointmentSubmitButton"
+    ).textContent =
+        "✏️ Update Appointment";
+
+
+    document.getElementById(
+        "cancelAppointmentEditButton"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+
+// ==========================================
+// UPDATE APPOINTMENT
+// ==========================================
+
+function updateAppointment() {
+
+    let appointments =
+        JSON.parse(
+            localStorage.getItem("appointments")
+        ) || [];
+
+
+    if (!appointments[editingAppointmentIndex]) {
+
+        alert("Appointment not found!");
+
+        return;
+    }
+
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let time =
+        document.getElementById("time").value;
+
+    let reason =
+        document.getElementById("reason").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        date === "" ||
+        time === "" ||
+        reason === ""
+    ) {
+
+        alert("Please fill all appointment details!");
+
+        return;
+    }
+
+
+    appointments[editingAppointmentIndex] = {
+
+        patient: patient,
+
+        doctor: doctor,
+
+        date: date,
+
+        time: time,
+
+        reason: reason
+
+    };
+
+
+    localStorage.setItem(
+        "appointments",
+        JSON.stringify(appointments)
+    );
+
+
+    resetAppointmentForm();
+
+    displayAppointments();
+
+
+    alert("✏️ Appointment updated successfully!");
+
+}
+
+
+
+// ==========================================
+// CANCEL EDIT
+// ==========================================
+
+function cancelAppointmentEdit() {
+
+    resetAppointmentForm();
+
+}
+
+
+
+// ==========================================
+// RESET FORM
+// ==========================================
+
+function resetAppointmentForm() {
+
+    document.getElementById("patient").value = "";
+
+    document.getElementById("doctor").value = "";
+
+    document.getElementById("date").value = "";
+
+    document.getElementById("time").value = "";
+
+    document.getElementById("reason").value = "";
+
+
+    editingAppointmentIndex = -1;
+
+
+    document.getElementById(
+        "appointmentSubmitButton"
+    ).textContent =
+        "📅 Book Appointment";
+
+
+    document.getElementById(
+        "cancelAppointmentEditButton"
+    ).style.display =
+        "none";
+
+}
+
+
+
+// ==========================================
+// DELETE APPOINTMENT
+// ==========================================
+
+function deleteAppointment(index) {
+
+    let appointments =
+        JSON.parse(
+            localStorage.getItem("appointments")
+        ) || [];
+
+
+    if (!appointments[index]) {
+
+        alert("Appointment not found!");
+
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this appointment?"
+        )
+    ) {
+
+        return;
+    }
+
+
+    appointments.splice(index, 1);
+
+
+    localStorage.setItem(
+        "appointments",
+        JSON.stringify(appointments)
+    );
+
+
+    displayAppointments();
+
+
+    alert("🗑️ Appointment deleted successfully!");
+
+}
+
+
+
+// ==========================================
+// LOAD APPOINTMENTS
+// ==========================================
+
+displayAppointments();
+
+
+</script>
+
+
+</body>
+</html>

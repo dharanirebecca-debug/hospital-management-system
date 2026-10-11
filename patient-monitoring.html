@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Home Health Monitoring</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+    // 🔒 Patient-only access
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "patient"
+    ) {
+        window.location.href = "login.html";
+    }
+</script>
+
+
+<header>
+    <h1>❤️ Home Health Monitoring</h1>
+    <p>Monitor your health from home</p>
+</header>
+
+
+<nav>
+    <a href="patient-dashboard.html">🏠 Dashboard</a>
+    <a href="patient.html">👤 My Details</a>
+    <a href="appointment.html">📅 Appointments</a>
+    <a href="prescription.html">💊 Prescriptions</a>
+    <a href="patient-notifications.html">🔔 Notifications</a>
+    <a href="patient-meeting.html">📹 Online Meeting</a>
+    <a href="patient-insurance.html">🛡️ Insurance</a>
+    <a href="patient-monitoring.html">❤️ Monitoring</a>
+    <a href="monitoring-history.html">📊 Monitoring History</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</nav>
+
+
+<main>
+
+    <!-- SENSOR STATUS -->
+    <div class="dashboard-box">
+
+        <h2>📡 Sensor Status</h2>
+
+        <p>
+            Sensor Connection:
+            <strong id="sensorStatus">Connected ✅</strong>
+        </p>
+
+        <button type="button" onclick="checkSensor()">
+            🔄 Check Sensor
+        </button>
+
+    </div>
+
+
+    <!-- HEALTH READINGS -->
+    <div class="dashboard-box">
+
+        <h2>📊 Health Readings</h2>
+
+        <p>
+            ❤️ Heart Rate:
+            <strong id="heartRate">--</strong> BPM
+        </p>
+
+        <p>
+            🌡️ Temperature:
+            <strong id="temperature">--</strong> °C
+        </p>
+
+        <p>
+            🫁 Oxygen Level:
+            <strong id="oxygen">--</strong> %
+        </p>
+
+        <button type="button" onclick="simulateReading()">
+            📡 Get Sensor Reading
+        </button>
+
+    </div>
+
+
+    <!-- EMERGENCY ALERT -->
+    <div class="dashboard-box">
+
+        <h2>🚨 Emergency Alert</h2>
+
+        <p id="emergencyAlert">
+            ✅ No emergency alerts
+        </p>
+        <p id="contactAlert">
+    📱 No emergency contact alert sent
+</p>
+
+        <p>
+            The system checks simulated health readings
+            and displays an alert when an abnormal reading
+            is detected.
+        </p>
+
+    </div>
+
+
+    <!-- HOSPITAL ALERT -->
+    <div class="dashboard-box">
+
+        <h2>🏥 Hospital Alert Status</h2>
+
+        <p id="hospitalAlert">
+            ✅ No hospital alert sent
+        </p>
+
+    </div>
+
+
+    <!-- EMERGENCY CONTACT -->
+    <div class="dashboard-box">
+
+        <h2>📱 Emergency Contact</h2>
+
+        <label for="emergencyName">
+            Contact Name:
+        </label>
+
+        <br>
+
+        <input
+            type="text"
+            id="emergencyName"
+            placeholder="Enter contact name"
+        >
+
+        <br><br>
+
+        <label for="emergencyPhone">
+            Contact Phone:
+        </label>
+
+        <br>
+
+        <input
+            type="tel"
+            id="emergencyPhone"
+            placeholder="Enter phone number"
+        >
+
+        <br><br>
+
+        <button type="button" onclick="saveEmergencyContact()">
+            💾 Save Contact
+        </button>
+
+        <p id="contactStatus" style="font-weight: bold;">
+            Contact not saved yet.
+        </p>
+
+    </div>
+
+</main>
+
+
+<script>
+
+    // 📡 Check Sensor
+    function checkSensor() {
+
+        document.getElementById("sensorStatus").innerText =
+            "Connected ✅";
+
+        alert("📡 Sensor connection is active.");
+
+    }
+
+
+    // ❤️ Generate Demo Sensor Reading
+    function simulateReading() {
+
+        let heartRate =
+            Math.floor(Math.random() * 81) + 50;
+
+        let temperature =
+            (36 + Math.random() * 2).toFixed(1);
+
+        let oxygen =
+            Math.floor(Math.random() * 11) + 90;
+
+
+        // Display readings
+        document.getElementById("heartRate").innerText =
+            heartRate;
+
+        document.getElementById("temperature").innerText =
+            temperature;
+
+        document.getElementById("oxygen").innerText =
+            oxygen;
+            let history =
+    JSON.parse(localStorage.getItem("monitoringHistory")) || [];
+
+history.push({
+    heartRate: heartRate,
+    temperature: temperature,
+    oxygen: oxygen,
+    time: new Date().toLocaleString()
+});
+
+localStorage.setItem(
+    "monitoringHistory",
+    JSON.stringify(history)
+);
+
+
+        // Save readings for Doctor Alerts
+        localStorage.setItem(
+            "doctorHeartRate",
+            heartRate
+        );
+
+        localStorage.setItem(
+            "doctorTemperature",
+            temperature
+        );
+
+        localStorage.setItem(
+            "doctorOxygen",
+            oxygen
+        );
+
+
+        // 🚨 Emergency Detection
+        if (
+            heartRate < 60 ||
+            heartRate > 100 ||
+            oxygen < 94 ||
+            temperature > 38
+        ) {
+
+            // Patient emergency alert
+            document.getElementById("emergencyAlert").innerText =
+                "🚨 ALERT: Abnormal reading detected. Emergency contact has been notified.";
+                document.getElementById("contactAlert").innerText =
+    "📱 Emergency contact notified successfully (Demo).";
+
+
+            // Hospital alert
+            document.getElementById("hospitalAlert").innerText =
+                "🏥 Hospital alert sent successfully (Demo).";
+
+
+            // Doctor emergency alert
+            localStorage.setItem(
+                "doctorEmergencyAlert",
+                "🚨 Emergency alert received from patient monitoring (Demo)."
+            );
+
+
+            // 🔔 Doctor notification
+            localStorage.setItem(
+                "doctorNotification",
+                "🔔 New emergency monitoring alert received (Demo)."
+            );
+
+
+            // Popup
+            alert(
+                "🚨 Emergency Alert!\n\n" +
+                "Abnormal health reading detected.\n\n" +
+                "Emergency contact has been notified."
+            );
+
+        } else {
+
+            document.getElementById("emergencyAlert").innerText =
+                "✅ Reading received. No emergency alert.";
+
+        }
+
+    }
+
+
+    // 📱 Save Emergency Contact
+    function saveEmergencyContact() {
+
+        let name =
+            document.getElementById("emergencyName").value.trim();
+
+        let phone =
+            document.getElementById("emergencyPhone").value.trim();
+
+
+        if (name === "" || phone === "") {
+
+            alert(
+                "Please enter contact name and phone number."
+            );
+
+            return;
+        }
+
+
+        localStorage.setItem(
+            "emergencyName",
+            name
+        );
+
+        localStorage.setItem(
+            "emergencyPhone",
+            phone
+        );
+
+
+        document.getElementById("contactStatus").innerHTML =
+            "✅ Emergency contact saved successfully!";
+
+
+        alert(
+            "✅ Emergency contact saved successfully!"
+        );
+
+    }
+
+
+    // 📱 Load Saved Emergency Contact
+    function loadEmergencyContact() {
+
+        let name =
+            localStorage.getItem("emergencyName");
+
+        let phone =
+            localStorage.getItem("emergencyPhone");
+
+
+        if (name && phone) {
+
+            document.getElementById("emergencyName").value =
+                name;
+
+            document.getElementById("emergencyPhone").value =
+                phone;
+
+            document.getElementById("contactStatus").innerHTML =
+                "✅ Saved emergency contact loaded.";
+
+        }
+
+    }
+
+
+    // 🚪 Logout
+    function logout() {
+
+        sessionStorage.clear();
+
+        alert("Logged out successfully");
+
+        window.location.href = "login.html";
+
+    }
+
+
+    // 🔄 Load saved contact when page opens
+    window.onload = function () {
+
+        loadEmergencyContact();
+
+    };
+
+</script>
+
+</body>
+
+</html>

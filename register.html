@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>New User Registration</title>
+
+    <style>
+
+        body {
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+
+            background: linear-gradient(
+                135deg,
+                #e0f7fa,
+                #e8eaf6,
+                #fce4ec
+            );
+        }
+
+
+        .register-box {
+
+            width: 90%;
+
+            max-width: 420px;
+
+            padding: 30px;
+
+            background: white;
+
+            border-radius: 20px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0, 0, 0, 0.15);
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-bottom: 25px;
+        }
+
+
+        label {
+
+            font-weight: bold;
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 12px;
+
+            margin-top: 8px;
+
+            margin-bottom: 18px;
+
+            box-sizing: border-box;
+
+            border: 1px solid #ccc;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+        }
+
+
+        button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #007bff;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        button:hover {
+
+            background: #0056b3;
+        }
+
+
+        .login-link {
+
+            text-align: center;
+
+            margin-top: 20px;
+        }
+
+
+        .login-link a {
+
+            color: #007bff;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+
+        .login-link a:hover {
+
+            text-decoration: underline;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="register-box">
+
+    <h1>
+        📝 New User Registration
+    </h1>
+
+
+    <form onsubmit="registerUser(event)">
+
+
+        <!-- REGISTER AS -->
+
+        <label for="role">
+            Register As
+        </label>
+
+        <select id="role" required>
+
+            <option value="">
+                Select Role
+            </option>
+
+            <option value="patient">
+                Patient
+            </option>
+
+            <option value="doctor">
+                Doctor
+            </option>
+
+        </select>
+
+
+        <!-- NAME -->
+
+        <label for="name">
+            Full Name
+        </label>
+
+        <input
+            type="text"
+            id="name"
+            placeholder="Enter full name"
+            required
+        >
+
+
+        <!-- EMAIL -->
+
+        <label for="email">
+            Email
+        </label>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Enter email"
+            required
+        >
+
+
+        <!-- PHONE -->
+
+        <label for="phone">
+            Phone
+        </label>
+
+        <input
+            type="tel"
+            id="phone"
+            placeholder="Enter phone number"
+            required
+        >
+
+
+        <!-- USERNAME -->
+
+        <label for="username">
+            Username
+        </label>
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Create username"
+            required
+        >
+
+
+        <!-- PASSWORD -->
+
+        <label for="password">
+            Password
+        </label>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Create password"
+            required
+        >
+
+
+        <button type="submit">
+            Register
+        </button>
+
+    </form>
+
+
+    <div class="login-link">
+
+        <p>
+            Already have an account?
+
+            <a href="login.html">
+                Login
+            </a>
+        </p>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+function registerUser(event) {
+
+    event.preventDefault();
+
+
+    /* =========================
+       GET FORM VALUES
+       ========================= */
+
+    let role =
+        document.getElementById("role").value;
+
+    let name =
+        document.getElementById("name").value.trim();
+
+    let email =
+        document.getElementById("email").value.trim();
+
+    let phone =
+        document.getElementById("phone").value.trim();
+
+    let username =
+        document.getElementById("username").value.trim();
+
+    let password =
+        document.getElementById("password").value;
+
+
+    /* =========================
+       CHECK ROLE
+       ========================= */
+
+    if (role === "") {
+
+        alert("Please select a role.");
+
+        return;
+    }
+
+
+    /* =========================
+       GET REGISTERED USERS
+       ========================= */
+
+    let users =
+        JSON.parse(
+            localStorage.getItem(
+                "registeredUsers"
+            )
+        ) || [];
+
+
+    /* =========================
+       CHECK USERNAME
+       ========================= */
+
+    let existingUser =
+        users.find(
+            user =>
+                user.username === username
+        );
+
+
+    if (existingUser) {
+
+        alert(
+            "Username already exists!"
+        );
+
+        return;
+    }
+
+
+    /* =========================
+       CREATE NEW USER
+       ========================= */
+
+    users.push({
+
+        name: name,
+
+        email: email,
+
+        phone: phone,
+
+        username: username,
+
+        password: password,
+
+        role: role
+
+    });
+
+
+    /* =========================
+       SAVE USER
+       ========================= */
+
+    localStorage.setItem(
+        "registeredUsers",
+        JSON.stringify(users)
+    );
+
+
+    /* =========================
+       SUCCESS MESSAGE
+       ========================= */
+
+    if (role === "doctor") {
+
+        alert(
+            "Doctor registration successful!"
+        );
+
+    } else {
+
+        alert(
+            "Patient registration successful!"
+        );
+
+    }
+
+
+    /* =========================
+       GO TO LOGIN
+       ========================= */
+
+    window.location.href =
+        "login.html";
+
+}
+
+</script>
+
+
+</body>
+
+</html>

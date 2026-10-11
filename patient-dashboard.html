@@ -1,0 +1,396 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Patient Dashboard - Hospital Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #e8eaf6);
+            color: #263238;
+        }
+
+        .header {
+            background: linear-gradient(120deg, #b2ebf2, #d1c4e9);
+            text-align: center;
+            padding: 30px 15px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px #00000015;
+        }
+
+        .header h1 {
+            margin: 0 0 12px;
+            font-size: 32px;
+        }
+
+        .header h3 {
+            margin: 10px 0 20px;
+        }
+
+        .appointment-reminders {
+            max-width: 900px;
+            margin: 20px auto 0;
+            padding: 20px;
+            background: #ffffffed;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px #00000012;
+        }
+
+        .appointment-reminders h2 {
+            color: #333;
+        }
+
+        .appointment-reminder {
+            background: #eaf4ff;
+            border-left: 5px solid #1976d2;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .appointment-reminder h3 {
+            color: #15549a;
+            margin-top: 0;
+        }
+
+        .navigation {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            padding: 25px 10px;
+        }
+
+        .navigation a {
+            color: #1565c0;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 9px;
+        }
+
+        .navigation a:hover {
+            color: #e65100;
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 3px 12px #00000012;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .status {
+            color: #16834a;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 25px;
+            }
+
+            .navigation {
+                gap: 6px;
+            }
+
+            .appointment-reminders {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>🏥 Patient Dashboard</h1>
+        <h3 id="welcomeMessage">Loading patient details...</h3>
+
+        <section class="appointment-reminders">
+            <h2>🔔 Appointment Reminders</h2>
+            <div id="appointmentReminderList">
+                Loading appointments...
+            </div>
+        </section>
+    </header>
+
+    <nav class="navigation">
+        <a href="patient-dashboard.html">🏠 Dashboard</a>
+        <a href="patient-profile.html">👤 My Profile</a>
+        <a href="patient-meeting.html">📅 Appointments</a>
+        <a href="prescription.html">💊 Prescriptions</a>
+        <a href="patient-notifications.html">🔔 Notifications</a>
+        <a href="patient-monitoring.html">❤️ Health Monitoring</a>
+        <a href="patient-insurance.html">🛡️ Insurance</a>
+        <a href="#" id="logoutLink">🚪 Logout</a>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2>👤 Patient Account</h2>
+            <p class="status">🟢 Your account is ready to use.</p>
+            <p><strong>Patient:</strong>
+                <span id="patientAccountName">Loading...</span>
+            </p>
+        </section>
+    </main>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // 1. Check patient login
+        const loggedIn = sessionStorage.getItem("loggedIn");
+        const userRole = sessionStorage.getItem("userRole");
+
+        if (loggedIn !== "true" || userRole !== "patient") {
+            window.location.replace("login.html");
+            return;
+        }
+
+        // 2. Read patient details from the login session
+        const patientName =
+            (sessionStorage.getItem("patientName") || "").trim();
+
+        const patientUsername =
+            (sessionStorage.getItem("patientUsername") || "").trim();
+
+        const displayedName = patientName || patientUsername || "Patient";
+
+        document.getElementById("welcomeMessage").textContent =
+            "Welcome, " + displayedName + "! 👋";
+
+        document.getElementById("patientAccountName").textContent =
+            displayedName;
+
+        const reminderList =
+            document.getElementById("appointmentReminderList");
+
+        // 3. Read saved appointments
+        function getAppointments() {
+            try {
+                const saved = JSON.parse(
+                    localStorage.getItem("appointments") || "[]"
+                );
+
+                return Array.isArray(saved) ? saved : [];
+            } catch (error) {
+                console.error("Error reading appointments:", error);
+                return [];
+            }
+        }
+
+        // 4. Display today's and upcoming appointments
+        function displayAppointmentReminders() {
+            reminderList.replaceChildren();
+
+            const appointments = getAppointments();
+
+            const possibleNames = [
+                patientName,
+                patientUsername
+            ]
+            .filter(Boolean)
+            .map(name => name.trim().toLowerCase());
+
+            if (possibleNames.length === 0) {
+                reminderList.textContent =
+                    "Patient login name was not found. Please log in again.";
+                return;
+            }
+
+            const now = new Date();
+
+            const today =
+                now.getFullYear() + "-" +
+                String(now.getMonth() + 1).padStart(2, "0") + "-" +
+                String(now.getDate()).padStart(2, "0");
+
+            const upcoming = appointments.filter(function (appointment) {
+                if (!appointment || !appointment.date) return false;
+
+                const appointmentName = String(
+                    appointment.patient ??
+                    appointment.patientName ??
+                    ""
+                ).trim().toLowerCase();
+
+                const appointmentDate =
+                    String(appointment.date).slice(0, 10);
+
+                return possibleNames.includes(appointmentName)
+                    && appointmentDate >= today;
+            });
+
+            upcoming.sort(function (a, b) {
+                return (
+                    String(a.date) + " " + String(a.time || "")
+                ).localeCompare(
+                    String(b.date) + " " + String(b.time || "")
+                );
+            });
+
+            if (upcoming.length === 0) {
+                reminderList.textContent =
+                    "No upcoming appointments.";
+
+                console.log("Logged-in patient:", displayedName);
+                console.log("Saved appointments:", appointments);
+                return;
+            }
+
+            upcoming.forEach(function (appointment) {
+                const reminder = document.createElement("div");
+                reminder.className = "appointment-reminder";
+
+                const appointmentDate =
+                    String(appointment.date).slice(0, 10);
+
+                const heading = document.createElement("h3");
+
+                heading.textContent = appointmentDate === today
+                    ? "📅 Your appointment is today!"
+                    : "🔔 Upcoming appointment";
+
+                const doctor = document.createElement("p");
+                doctor.textContent =
+                    "Doctor: " + (appointment.doctor || "Not specified");
+
+                const date = document.createElement("p");
+                date.textContent = "Date: " + appointmentDate;
+
+                const time = document.createElement("p");
+                time.textContent =
+                    "Time: " + (appointment.time || "Not specified");
+
+                const reason = document.createElement("p");
+                reason.textContent =
+                    "Reason: " + (appointment.reason || "Not specified");
+
+                reminder.append(heading, doctor, date, time, reason);
+                reminderList.appendChild(reminder);
+            });
+        }
+
+        // 5. Automatic reminders while this dashboard is open
+        function checkAutomaticReminders() {
+            const appointments = getAppointments();
+
+            const names = [patientName, patientUsername]
+                .filter(Boolean)
+                .map(name => name.trim().toLowerCase());
+
+            const now = new Date();
+
+            appointments.forEach(function (appointment) {
+                if (!appointment || !appointment.date || !appointment.time) {
+                    return;
+                }
+
+                const appointmentName = String(
+                    appointment.patient ??
+                    appointment.patientName ??
+                    ""
+                ).trim().toLowerCase();
+
+                if (!names.includes(appointmentName)) return;
+
+                const appointmentDate = new Date(
+                    String(appointment.date).slice(0, 10) +
+                    "T" + appointment.time
+                );
+
+                const minutesRemaining =
+                    (appointmentDate.getTime() - now.getTime()) / 60000;
+
+                let reminderType = "";
+                let message = "";
+
+                // Approximately 24 hours before
+                if (minutesRemaining > 1439 && minutesRemaining <= 1441) {
+                    reminderType = "24-hours";
+                    message = "Your appointment with " +
+                        (appointment.doctor || "your doctor") +
+                        " is tomorrow.";
+                }
+
+                // Approximately 1 hour before
+                if (minutesRemaining > 59 && minutesRemaining <= 61) {
+                    reminderType = "1-hour";
+                    message = "Your appointment with " +
+                        (appointment.doctor || "your doctor") +
+                        " is in about 1 hour.";
+                }
+
+                if (!reminderType) return;
+
+                const appointmentId = appointment.id ||
+                    (
+                        appointmentName + "_" +
+                        appointment.date + "_" +
+                        appointment.time + "_" +
+                        (appointment.doctor || "")
+                    );
+
+                const reminderKey =
+                    "shownReminder_" + appointmentId + "_" + reminderType;
+
+                if (localStorage.getItem(reminderKey)) return;
+
+                localStorage.setItem(reminderKey, "shown");
+
+                alert("🔔 Appointment Reminder\n\n" + message);
+            });
+        }
+
+        // Run reminders now, then once every minute
+        displayAppointmentReminders();
+        checkAutomaticReminders();
+
+        setInterval(function () {
+            displayAppointmentReminders();
+            checkAutomaticReminders();
+        }, 60000);
+
+        // 6. Logout
+        document.getElementById("logoutLink").addEventListener(
+            "click",
+            function (event) {
+                event.preventDefault();
+
+                sessionStorage.removeItem("loggedIn");
+                sessionStorage.removeItem("userRole");
+                sessionStorage.removeItem("patientName");
+                sessionStorage.removeItem("patientUsername");
+
+                window.location.href = "login.html";
+            }
+        );
+
+    });
+    </script>
+
+</body>
+</html>

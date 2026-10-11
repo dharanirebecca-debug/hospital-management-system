@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Monitoring History</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+    // 🔒 Patient-only access
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "patient"
+    ) {
+        window.location.href = "login.html";
+    }
+</script>
+
+<header>
+    <h1>📊 Monitoring History</h1>
+    <p>View previous health monitoring readings</p>
+</header>
+
+<nav>
+    <a href="patient-dashboard.html">🏠 Dashboard</a>
+    <a href="patient-monitoring.html">❤️ Monitoring</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</nav>
+
+<main>
+
+    <div class="dashboard-box">
+
+        <h2>❤️ Health Reading History</h2>
+
+       <div id="historyList">
+    Loading monitoring history...
+</div>
+<br>
+
+<button type="button" onclick="clearHistory()">
+    🧹 Clear Monitoring History
+</button>
+</main>
+
+<script>
+function loadHistory() {
+
+    let history =
+        JSON.parse(localStorage.getItem("monitoringHistory")) || [];
+
+    let historyList =
+        document.getElementById("historyList");
+
+    if (history.length === 0) {
+
+        historyList.innerHTML =
+            "📊 No monitoring history available.";
+
+        return;
+    }
+
+    historyList.innerHTML = "";
+
+    history.reverse().forEach(function(reading) {
+
+        let box = document.createElement("div");
+
+        box.className = "dashboard-box";
+
+        box.innerHTML = `
+            <h3>📅 ${reading.time}</h3>
+
+            <p>❤️ Heart Rate:
+                <strong>${reading.heartRate}</strong> BPM
+            </p>
+
+            <p>🌡️ Temperature:
+                <strong>${reading.temperature}</strong> °C
+            </p>
+
+            <p>🫁 Oxygen Level:
+                <strong>${reading.oxygen}</strong> %
+            </p>
+        `;
+
+        historyList.appendChild(box);
+
+    });
+}
+function clearHistory() {
+
+    localStorage.removeItem("monitoringHistory");
+
+    document.getElementById("historyList").innerHTML =
+        "📊 No monitoring history available.";
+
+    alert("🧹 Demo monitoring history cleared successfully.");
+}
+function logout() {
+
+    sessionStorage.clear();
+
+    alert("Logged out successfully");
+
+    window.location.href = "login.html";
+
+}
+window.onload = function() {
+    loadHistory();
+};
+</script>
+
+</body>
+
+</html>

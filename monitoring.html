@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Patient Monitoring</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            box-shadow: 0 0 8px #ccc;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 9px;
+            margin-top: 5px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 9px 15px;
+            margin: 3px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #999;
+            text-align: left;
+        }
+
+        th {
+            background: #d9edf7;
+        }
+
+        .normal {
+            font-weight: bold;
+        }
+
+        .emergency {
+            font-weight: bold;
+        }
+
+        #monitoringDetails {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            background: white;
+            padding: 25px;
+
+            border: 2px solid #333;
+            border-radius: 10px;
+
+            box-shadow: 0 0 15px #555;
+
+            width: 350px;
+            z-index: 1000;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>📡 Patient Monitoring</h1>
+
+    <a href="index.html">🏠 Dashboard</a>
+
+    <hr>
+
+
+    <!-- MONITORING FORM -->
+
+    <h2>📡 Add Patient Monitoring</h2>
+
+    <form onsubmit="event.preventDefault(); handleMonitoringSubmit();">
+
+
+        <label>Patient Name:</label>
+
+        <input
+            type="text"
+            id="patient"
+            required
+        >
+
+
+        <label>Heart Rate (BPM):</label>
+
+        <input
+            type="number"
+            id="heartRate"
+            min="1"
+            required
+        >
+
+
+        <label>Temperature (°C):</label>
+
+        <input
+            type="number"
+            id="temperature"
+            step="0.1"
+            min="1"
+            required
+        >
+
+
+        <label>Oxygen Level (SpO₂ %):</label>
+
+        <input
+            type="number"
+            id="oxygen"
+            min="1"
+            max="100"
+            required
+        >
+
+
+        <label>Condition:</label>
+
+        <select id="condition" required>
+
+            <option value="">
+                Select Condition
+            </option>
+
+            <option value="Normal">
+                Normal
+            </option>
+
+            <option value="Needs Attention">
+                Needs Attention
+            </option>
+
+            <option value="Critical">
+                Critical
+            </option>
+
+        </select>
+
+
+        <button
+            type="submit"
+            id="monitoringSubmitButton"
+        >
+            ➕ Add Monitoring
+        </button>
+
+
+        <button
+            type="button"
+            id="cancelMonitoringEditButton"
+            onclick="cancelMonitoringEdit()"
+            style="display:none;"
+        >
+            ✖️ Cancel Edit
+        </button>
+
+    </form>
+
+
+    <!-- TOTAL -->
+
+    <p>
+
+        📡 <b>Total Monitoring Records:</b>
+
+        <span id="monitoringTotal">0</span>
+
+    </p>
+
+
+    <!-- EMERGENCY ALERT -->
+
+    <div
+        id="monitoringAlert"
+        style="
+            background:white;
+            padding:15px;
+            margin-top:15px;
+            border-radius:10px;
+            box-shadow:0 0 8px #ccc;
+        "
+    >
+        ✅ No critical monitoring alerts
+    </div>
+
+
+    <!-- MONITORING LIST -->
+
+    <h2>📋 Monitoring List</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Patient</th>
+
+                <th>Heart Rate</th>
+
+                <th>Temperature</th>
+
+                <th>Oxygen</th>
+
+                <th>Condition</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="monitoringList"></tbody>
+
+    </table>
+
+
+    <!-- VIEW POPUP -->
+
+    <div id="monitoringDetails">
+
+        <h2>📡 Monitoring Details</h2>
+
+
+        <p>
+            <b>Patient:</b>
+            <span id="viewMonitoringPatient"></span>
+        </p>
+
+
+        <p>
+            <b>Heart Rate:</b>
+            <span id="viewMonitoringHeartRate"></span>
+            BPM
+        </p>
+
+
+        <p>
+            <b>Temperature:</b>
+            <span id="viewMonitoringTemperature"></span>
+            °C
+        </p>
+
+
+        <p>
+            <b>Oxygen:</b>
+            <span id="viewMonitoringOxygen"></span>
+            %
+        </p>
+
+
+        <p>
+            <b>Condition:</b>
+            <span id="viewMonitoringCondition"></span>
+        </p>
+
+
+        <button
+            type="button"
+            onclick="closeMonitoringDetails()"
+        >
+            ✖️ Close
+        </button>
+
+    </div>
+
+
+
+<script>
+
+
+// ==========================================
+// EDITING INDEX
+// ==========================================
+
+let editingMonitoringIndex = -1;
+
+
+
+// ==========================================
+// HANDLE FORM
+// ==========================================
+
+function handleMonitoringSubmit() {
+
+    if (editingMonitoringIndex === -1) {
+
+        addMonitoring();
+
+    } else {
+
+        updateMonitoring();
+
+    }
+
+}
+
+
+
+// ==========================================
+// ADD MONITORING
+// ==========================================
+
+function addMonitoring() {
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let heartRate =
+        document.getElementById("heartRate").value;
+
+    let temperature =
+        document.getElementById("temperature").value;
+
+    let oxygen =
+        document.getElementById("oxygen").value;
+
+    let condition =
+        document.getElementById("condition").value;
+
+
+    if (
+        patient === "" ||
+        heartRate === "" ||
+        temperature === "" ||
+        oxygen === "" ||
+        condition === ""
+    ) {
+
+        alert("Please fill all monitoring details!");
+
+        return;
+    }
+
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    monitoring.push({
+
+        patient: patient,
+
+        heartRate: heartRate,
+
+        temperature: temperature,
+
+        oxygen: oxygen,
+
+        condition: condition
+
+    });
+
+
+    localStorage.setItem(
+        "monitoring",
+        JSON.stringify(monitoring)
+    );
+
+
+    displayMonitoring();
+
+    resetMonitoringForm();
+
+
+    if (condition === "Critical") {
+
+        alert(
+            "🚨 EMERGENCY ALERT!\n\n" +
+            "Patient " +
+            patient +
+            " is in Critical condition."
+        );
+
+    } else {
+
+        alert(
+            "📡 Monitoring record added successfully!"
+        );
+
+    }
+
+}
+
+
+
+// ==========================================
+// DISPLAY MONITORING
+// ==========================================
+
+function displayMonitoring() {
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    document.getElementById(
+        "monitoringTotal"
+    ).textContent =
+        monitoring.length;
+
+
+    let list =
+        document.getElementById(
+            "monitoringList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    monitoring.forEach(
+        function(record, index) {
+
+
+            let row =
+                list.insertRow();
+
+
+            row.insertCell(0).textContent =
+                record.patient || "";
+
+
+            row.insertCell(1).textContent =
+                record.heartRate || "";
+
+
+            row.insertCell(2).textContent =
+                record.temperature || "";
+
+
+            row.insertCell(3).textContent =
+                record.oxygen || "";
+
+
+            row.insertCell(4).textContent =
+                record.condition || "";
+
+
+            let actionCell =
+                row.insertCell(5);
+
+
+            actionCell.innerHTML =
+
+                '<button type="button" onclick="viewMonitoring(' +
+                index +
+                ')">👁️ View</button> ' +
+
+                '<button type="button" onclick="editMonitoring(' +
+                index +
+                ')">✏️ Edit</button> ' +
+
+                '<button type="button" onclick="deleteMonitoring(' +
+                index +
+                ')">🗑️ Delete</button>';
+
+        }
+    );
+
+
+    updateMonitoringAlert();
+
+}
+
+
+
+// ==========================================
+// EMERGENCY ALERT
+// ==========================================
+
+function updateMonitoringAlert() {
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    let criticalPatients =
+        monitoring.filter(
+            function(record) {
+
+                return record.condition === "Critical";
+
+            }
+        );
+
+
+    let alertBox =
+        document.getElementById(
+            "monitoringAlert"
+        );
+
+
+    if (criticalPatients.length > 0) {
+
+        alertBox.innerHTML =
+
+            "🚨 <b>EMERGENCY ALERT!</b><br>" +
+
+            criticalPatients.length +
+
+            " patient(s) are in Critical condition.";
+
+    } else {
+
+        alertBox.innerHTML =
+            "✅ No critical monitoring alerts";
+
+    }
+
+}
+
+
+
+// ==========================================
+// VIEW MONITORING
+// ==========================================
+
+function viewMonitoring(index) {
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    let record =
+        monitoring[index];
+
+
+    if (!record) {
+
+        alert("Monitoring record not found!");
+
+        return;
+    }
+
+
+    document.getElementById(
+        "viewMonitoringPatient"
+    ).textContent =
+        record.patient || "";
+
+
+    document.getElementById(
+        "viewMonitoringHeartRate"
+    ).textContent =
+        record.heartRate || "";
+
+
+    document.getElementById(
+        "viewMonitoringTemperature"
+    ).textContent =
+        record.temperature || "";
+
+
+    document.getElementById(
+        "viewMonitoringOxygen"
+    ).textContent =
+        record.oxygen || "";
+
+
+    document.getElementById(
+        "viewMonitoringCondition"
+    ).textContent =
+        record.condition || "";
+
+
+    document.getElementById(
+        "monitoringDetails"
+    ).style.display =
+        "block";
+
+}
+
+
+
+// ==========================================
+// CLOSE VIEW
+// ==========================================
+
+function closeMonitoringDetails() {
+
+    document.getElementById(
+        "monitoringDetails"
+    ).style.display =
+        "none";
+
+}
+
+
+
+// ==========================================
+// EDIT MONITORING
+// ==========================================
+
+function editMonitoring(index) {
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    let record =
+        monitoring[index];
+
+
+    if (!record) {
+
+        alert("Monitoring record not found!");
+
+        return;
+    }
+
+
+    document.getElementById("patient").value =
+        record.patient || "";
+
+
+    document.getElementById("heartRate").value =
+        record.heartRate || "";
+
+
+    document.getElementById("temperature").value =
+        record.temperature || "";
+
+
+    document.getElementById("oxygen").value =
+        record.oxygen || "";
+
+
+    document.getElementById("condition").value =
+        record.condition || "";
+
+
+    editingMonitoringIndex = index;
+
+
+    document.getElementById(
+        "monitoringSubmitButton"
+    ).textContent =
+        "✏️ Update Monitoring";
+
+
+    document.getElementById(
+        "cancelMonitoringEditButton"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+
+// ==========================================
+// UPDATE MONITORING
+// ==========================================
+
+function updateMonitoring() {
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    if (!monitoring[editingMonitoringIndex]) {
+
+        alert("Monitoring record not found!");
+
+        return;
+    }
+
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let heartRate =
+        document.getElementById("heartRate").value;
+
+    let temperature =
+        document.getElementById("temperature").value;
+
+    let oxygen =
+        document.getElementById("oxygen").value;
+
+    let condition =
+        document.getElementById("condition").value;
+
+
+    if (
+        patient === "" ||
+        heartRate === "" ||
+        temperature === "" ||
+        oxygen === "" ||
+        condition === ""
+    ) {
+
+        alert("Please fill all monitoring details!");
+
+        return;
+    }
+
+
+    monitoring[editingMonitoringIndex] = {
+
+        patient: patient,
+
+        heartRate: heartRate,
+
+        temperature: temperature,
+
+        oxygen: oxygen,
+
+        condition: condition
+
+    };
+
+
+    localStorage.setItem(
+        "monitoring",
+        JSON.stringify(monitoring)
+    );
+
+
+    resetMonitoringForm();
+
+    displayMonitoring();
+
+
+    alert(
+        "✏️ Monitoring record updated successfully!"
+    );
+
+}
+
+
+
+// ==========================================
+// CANCEL EDIT
+// ==========================================
+
+function cancelMonitoringEdit() {
+
+    resetMonitoringForm();
+
+}
+
+
+
+// ==========================================
+// RESET FORM
+// ==========================================
+
+function resetMonitoringForm() {
+
+    document.getElementById("patient").value = "";
+
+    document.getElementById("heartRate").value = "";
+
+    document.getElementById("temperature").value = "";
+
+    document.getElementById("oxygen").value = "";
+
+    document.getElementById("condition").value = "";
+
+
+    editingMonitoringIndex = -1;
+
+
+    document.getElementById(
+        "monitoringSubmitButton"
+    ).textContent =
+        "➕ Add Monitoring";
+
+
+    document.getElementById(
+        "cancelMonitoringEditButton"
+    ).style.display =
+        "none";
+
+}
+
+
+
+// ==========================================
+// DELETE MONITORING
+// ==========================================
+
+function deleteMonitoring(index) {
+
+    let monitoring =
+        JSON.parse(
+            localStorage.getItem("monitoring")
+        ) || [];
+
+
+    if (!monitoring[index]) {
+
+        alert("Monitoring record not found!");
+
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this monitoring record?"
+        )
+    ) {
+
+        return;
+    }
+
+
+    monitoring.splice(index, 1);
+
+
+    localStorage.setItem(
+        "monitoring",
+        JSON.stringify(monitoring)
+    );
+
+
+    displayMonitoring();
+
+
+    alert(
+        "🗑️ Monitoring record deleted successfully!"
+    );
+
+}
+
+
+
+// ==========================================
+// LOAD DATA
+// ==========================================
+
+displayMonitoring();
+
+
+</script>
+
+</body>
+</html>

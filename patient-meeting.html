@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Online Doctor Meeting</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+    // Protect Patient Meeting page
+    if (
+        sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "patient"
+    ) {
+        window.location.href = "login.html";
+    }
+</script>
+
+<header>
+    <h1>📹 Online Doctor Meeting</h1>
+    <p>Online consultation with your doctor</p>
+</header>
+
+<nav>
+    <a href="patient-dashboard.html">🏠 Dashboard</a>
+    <a href="patient.html">👤 My Details</a>
+    <a href="appointment.html">📅 Appointments</a>
+    <a href="prescription.html">💊 Prescriptions</a>
+    <a href="patient-notifications.html">🔔 Notifications</a>
+    <a href="patient-meeting.html">📹 Online Meeting</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</nav>
+
+<main>
+
+    <h2>📹 Online Consultation</h2>
+
+    <div class="dashboard-box">
+        <h3>👨‍⚕️ Doctor Consultation</h3>
+
+        <p>
+            Attend your scheduled online consultation with your doctor.
+        </p>
+
+        <p>
+            Meeting status: <strong>Waiting for doctor</strong>
+        </p>
+
+        <button onclick="joinMeeting()">
+            📹 Join Meeting
+        </button>
+    </div>
+
+</main>
+
+<script>
+    function joinMeeting() {
+        alert("Online meeting will be available when the doctor starts the consultation.");
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        alert("Logged out successfully");
+        window.location.href = "login.html";
+    }
+</script>
+
+</body>
+</html>

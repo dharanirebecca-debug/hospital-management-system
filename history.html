@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Medical History Management</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 550px;
+            box-shadow: 0 0 8px #ccc;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 9px;
+            margin-top: 5px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            padding: 9px 15px;
+            margin: 3px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #999;
+            text-align: left;
+        }
+
+        th {
+            background: #d9edf7;
+        }
+
+        #historyDetails {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #555;
+            width: 350px;
+            z-index: 1000;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>📋 Medical History Management</h1>
+
+<a href="index.html">🏠 Dashboard</a>
+
+<hr>
+
+
+<h2>➕ Add Medical History</h2>
+
+<form onsubmit="event.preventDefault(); handleHistorySubmit();">
+
+    <label>Patient Name:</label>
+
+    <input
+        type="text"
+        id="patient"
+        required
+    >
+
+
+    <label>Doctor Name:</label>
+
+    <input
+        type="text"
+        id="doctor"
+        required
+    >
+
+
+    <label>Visit Date:</label>
+
+    <input
+        type="date"
+        id="date"
+        required
+    >
+
+
+    <label>Diagnosis:</label>
+
+    <textarea
+        id="diagnosis"
+        placeholder="Enter diagnosis"
+        required
+    ></textarea>
+
+
+    <label>Treatment:</label>
+
+    <textarea
+        id="treatment"
+        placeholder="Enter treatment details"
+        required
+    ></textarea>
+
+
+    <button
+        type="submit"
+        id="historySubmitButton"
+    >
+        ➕ Add History
+    </button>
+
+
+    <button
+        type="button"
+        id="cancelHistoryEditButton"
+        onclick="cancelHistoryEdit()"
+        style="display:none;"
+    >
+        ✖️ Cancel Edit
+    </button>
+
+</form>
+
+
+<p>
+
+    📋 <b>Total Medical History:</b>
+
+    <span id="historyTotal">0</span>
+
+</p>
+
+
+<h2>📋 Medical History List</h2>
+
+<table>
+
+    <thead>
+
+        <tr>
+
+            <th>Patient</th>
+
+            <th>Doctor</th>
+
+            <th>Visit Date</th>
+
+            <th>Diagnosis</th>
+
+            <th>Treatment</th>
+
+            <th>Action</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody id="historyList"></tbody>
+
+</table>
+
+
+<!-- VIEW POPUP -->
+
+<div id="historyDetails">
+
+    <h2>📋 Medical History Details</h2>
+
+    <p>
+        <b>Patient:</b>
+        <span id="viewHistoryPatient"></span>
+    </p>
+
+    <p>
+        <b>Doctor:</b>
+        <span id="viewHistoryDoctor"></span>
+    </p>
+
+    <p>
+        <b>Visit Date:</b>
+        <span id="viewHistoryDate"></span>
+    </p>
+
+    <p>
+        <b>Diagnosis:</b>
+        <span id="viewHistoryDiagnosis"></span>
+    </p>
+
+    <p>
+        <b>Treatment:</b>
+        <span id="viewHistoryTreatment"></span>
+    </p>
+
+    <button
+        type="button"
+        onclick="closeHistoryDetails()"
+    >
+        ✖️ Close
+    </button>
+
+</div>
+
+
+<script>
+
+let editingHistoryIndex = -1;
+
+
+// ==========================================
+// HANDLE FORM
+// ==========================================
+
+function handleHistorySubmit() {
+
+    if (editingHistoryIndex === -1) {
+
+        addHistory();
+
+    } else {
+
+        updateHistory();
+
+    }
+
+}
+
+
+// ==========================================
+// ADD HISTORY
+// ==========================================
+
+function addHistory() {
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let diagnosis =
+        document.getElementById("diagnosis").value.trim();
+
+    let treatment =
+        document.getElementById("treatment").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        date === "" ||
+        diagnosis === "" ||
+        treatment === ""
+    ) {
+
+        alert("Please fill all medical history details!");
+
+        return;
+    }
+
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("history")
+        ) || [];
+
+
+    history.push({
+
+        patient: patient,
+
+        doctor: doctor,
+
+        date: date,
+
+        diagnosis: diagnosis,
+
+        treatment: treatment
+
+    });
+
+
+    localStorage.setItem(
+        "history",
+        JSON.stringify(history)
+    );
+
+
+    resetHistoryForm();
+
+    displayHistory();
+
+
+    alert("📋 Medical history added successfully!");
+
+}
+
+
+// ==========================================
+// DISPLAY HISTORY
+// ==========================================
+
+function displayHistory() {
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("history")
+        ) || [];
+
+
+    document.getElementById(
+        "historyTotal"
+    ).textContent =
+        history.length;
+
+
+    let list =
+        document.getElementById(
+            "historyList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    history.forEach(
+        function(record, index) {
+
+            let row =
+                list.insertRow();
+
+
+            row.insertCell(0).textContent =
+                record.patient || "";
+
+
+            row.insertCell(1).textContent =
+                record.doctor || "";
+
+
+            row.insertCell(2).textContent =
+                record.date || "";
+
+
+            row.insertCell(3).textContent =
+                record.diagnosis || "";
+
+
+            row.insertCell(4).textContent =
+                record.treatment || "";
+
+
+            let actionCell =
+                row.insertCell(5);
+
+
+            actionCell.innerHTML =
+
+                '<button type="button" onclick="viewHistory(' +
+                index +
+                ')">👁️ View</button> ' +
+
+                '<button type="button" onclick="editHistory(' +
+                index +
+                ')">✏️ Edit</button> ' +
+
+                '<button type="button" onclick="deleteHistory(' +
+                index +
+                ')">🗑️ Delete</button>';
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// VIEW HISTORY
+// ==========================================
+
+function viewHistory(index) {
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("history")
+        ) || [];
+
+
+    let record =
+        history[index];
+
+
+    if (!record) {
+
+        alert("Medical history not found!");
+
+        return;
+    }
+
+
+    document.getElementById(
+        "viewHistoryPatient"
+    ).textContent =
+        record.patient || "";
+
+
+    document.getElementById(
+        "viewHistoryDoctor"
+    ).textContent =
+        record.doctor || "";
+
+
+    document.getElementById(
+        "viewHistoryDate"
+    ).textContent =
+        record.date || "";
+
+
+    document.getElementById(
+        "viewHistoryDiagnosis"
+    ).textContent =
+        record.diagnosis || "";
+
+
+    document.getElementById(
+        "viewHistoryTreatment"
+    ).textContent =
+        record.treatment || "";
+
+
+    document.getElementById(
+        "historyDetails"
+    ).style.display =
+        "block";
+
+}
+
+
+// ==========================================
+// CLOSE VIEW
+// ==========================================
+
+function closeHistoryDetails() {
+
+    document.getElementById(
+        "historyDetails"
+    ).style.display =
+        "none";
+
+}
+
+
+// ==========================================
+// EDIT HISTORY
+// ==========================================
+
+function editHistory(index) {
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("history")
+        ) || [];
+
+
+    let record =
+        history[index];
+
+
+    if (!record) {
+
+        alert("Medical history not found!");
+
+        return;
+    }
+
+
+    document.getElementById("patient").value =
+        record.patient || "";
+
+
+    document.getElementById("doctor").value =
+        record.doctor || "";
+
+
+    document.getElementById("date").value =
+        record.date || "";
+
+
+    document.getElementById("diagnosis").value =
+        record.diagnosis || "";
+
+
+    document.getElementById("treatment").value =
+        record.treatment || "";
+
+
+    editingHistoryIndex = index;
+
+
+    document.getElementById(
+        "historySubmitButton"
+    ).textContent =
+        "✏️ Update History";
+
+
+    document.getElementById(
+        "cancelHistoryEditButton"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+// ==========================================
+// UPDATE HISTORY
+// ==========================================
+
+function updateHistory() {
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("history")
+        ) || [];
+
+
+    if (!history[editingHistoryIndex]) {
+
+        alert("Medical history not found!");
+
+        return;
+    }
+
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let diagnosis =
+        document.getElementById("diagnosis").value.trim();
+
+    let treatment =
+        document.getElementById("treatment").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        date === "" ||
+        diagnosis === "" ||
+        treatment === ""
+    ) {
+
+        alert("Please fill all medical history details!");
+
+        return;
+    }
+
+
+    history[editingHistoryIndex] = {
+
+        patient: patient,
+
+        doctor: doctor,
+
+        date: date,
+
+        diagnosis: diagnosis,
+
+        treatment: treatment
+
+    };
+
+
+    localStorage.setItem(
+        "history",
+        JSON.stringify(history)
+    );
+
+
+    resetHistoryForm();
+
+    displayHistory();
+
+
+    alert("✏️ Medical history updated successfully!");
+
+}
+
+
+// ==========================================
+// CANCEL EDIT
+// ==========================================
+
+function cancelHistoryEdit() {
+
+    resetHistoryForm();
+
+}
+
+
+// ==========================================
+// RESET FORM
+// ==========================================
+
+function resetHistoryForm() {
+
+    document.getElementById("patient").value = "";
+
+    document.getElementById("doctor").value = "";
+
+    document.getElementById("date").value = "";
+
+    document.getElementById("diagnosis").value = "";
+
+    document.getElementById("treatment").value = "";
+
+
+    editingHistoryIndex = -1;
+
+
+    document.getElementById(
+        "historySubmitButton"
+    ).textContent =
+        "➕ Add History";
+
+
+    document.getElementById(
+        "cancelHistoryEditButton"
+    ).style.display =
+        "none";
+
+}
+
+
+// ==========================================
+// DELETE HISTORY
+// ==========================================
+
+function deleteHistory(index) {
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("history")
+        ) || [];
+
+
+    if (!history[index]) {
+
+        alert("Medical history not found!");
+
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this medical history?"
+        )
+    ) {
+
+        return;
+    }
+
+
+    history.splice(index, 1);
+
+
+    localStorage.setItem(
+        "history",
+        JSON.stringify(history)
+    );
+
+
+    displayHistory();
+
+
+    alert("🗑️ Medical history deleted successfully!");
+
+}
+
+
+// ==========================================
+// LOAD HISTORY
+// ==========================================
+
+displayHistory();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f7fb;
+}
+
+.header {
+    background: #1976d2;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 30px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px #ccc;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px #aaa;
+}
+
+.card h2 {
+    margin: 10px 0;
+}
+
+.count {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.logout {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#emergencyAlert {
+    margin: 20px 30px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+@media (max-width: 900px) {
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+</head>
+
+<body>
+    <div class="header">
+
+    <h1>🏥 Hospital Management System</h1>
+
+    <p>Providing quality healthcare services</p>
+
+    <button class="logout" onclick="logout()">
+        🚪 Logout
+    </button>
+
+</div>
+
+<nav style="
+    background: white;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px #ccc;
+">
+
+    <a href="index.html">🏠 Home</a> &nbsp; | &nbsp;
+
+    <a href="doctor.html">👨‍⚕️ Doctors</a> &nbsp; | &nbsp;
+
+    <a href="patient.html">👤 Patients</a> &nbsp; | &nbsp;
+
+    <a href="appointment.html">📅 Appointments</a> &nbsp; | &nbsp;
+
+    <a href="prescription.html">💊 Prescriptions</a> &nbsp; | &nbsp;
+
+    <a href="notification.html">🔔 Notifications</a> &nbsp; | &nbsp;
+
+    <a href="monitoring.html">❤️ Monitoring</a> &nbsp; | &nbsp;
+
+    <a href="meeting.html">💻 Meetings</a> &nbsp; | &nbsp;
+
+    <a href="history.html">📋 History</a>
+
+</nav>
+
+    <header>
+        <h1>🏥 Hospital Management System</h1>
+        
+    <div id="emergencyAlert">
+    ✅ No emergency alerts
+        <div class="dashboard">
+          
+
+
+    <a href="doctor.html" class="card">
+    <h2>👨‍⚕️ Doctors</h2>
+    <p id="doctorCount">0</p>
+</a>
+
+<a href="patient.html" class="card">
+    <h2>👤 Patients</h2>
+    <p id="patientCount">0</p>
+</a>
+
+<a href="appointment.html" class="card">
+    <h2>📅 Appointments</h2>
+    <p id="appointmentCount">0</p>
+</a>
+
+<a href="prescription.html" class="card">
+    <h2>💊 Prescriptions</h2>
+    <p id="prescriptionCount">0</p>
+</a>
+
+<a href="notification.html" class="card">
+    <h2>🔔 Notifications</h2>
+    <p id="notificationCount">0</p>
+</a>
+
+<a href="monitoring.html" class="card">
+    <h2>🚨 Monitoring</h2>
+    <p id="monitoringCount">0</p>
+</a>
+
+ 
+
+</div>>
+
+</div>
+        <p>Welcome to our Hospital</p>
+    </header>
+
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="doctors.html">👨‍⚕️ Doctors</a>
+        <a href="patients.html">🧑‍🤝‍🧑 Patients</a>
+        <a href="appointment.html">📅 Appointments</a>
+        <a href="prescription.html">💊 Prescriptions</a>
+      <a href="notification.html">🔔 Notification</a>  
+      <a href="monitoring.html">🚨 Monitoring</a>
+      <a href="login.html">🔐 Logout</a>
+    </nav>
+
+    <div class="content">
+        <h2>Welcome!</h2>
+        <p>Manage hospital information easily.</p>
+    </div>
+<section class="welcome">
+    <h2>Welcome to Hospital Management System</h2>
+    <p>Manage doctors, patients, appointments and prescriptions easily.</p>
+</section>
+<section class="about-hospital">
+    <h2>🏥 About Our Hospital</h2>
+    <p>
+        Our hospital provides quality healthcare services
+        with experienced doctors and patient-friendly care.
+    </p>
+</section>
+<div class="dashboard">
+<div class="dashboard">
+
+    <a href="doctor.html" class="card">
+        <h2>👨‍⚕️ Doctors</h2>
+        <p id="doctorCount">0</p>
+    </a>
+
+    <a href="patient.html" class="card">
+        <h2>👤 Patients</h2>
+        <p id="patientCount">0</p>
+    </a>
+
+    <a href="appointment.html" class="card">
+        <h2>📅 Appointments</h2>
+        <p id="appointmentCount">0</p>
+    </a>
+
+    <a href="prescription.html" class="card">
+        <h2>💊 Prescriptions</h2>
+        <p id="prescriptionCount">0</p>
+    </a>
+
+    <a href="notification.html" class="card">
+        <h2>🔔 Notifications</h2>
+        <p id="notificationCount">0</p>
+    </a>
+
+    <a href="monitoring.html" class="card">
+        <h2>🚨 Monitoring</h2>
+        <p id="monitoringCount">0</p>
+    </a>
+
+    <a href="meeting.html" class="card">
+    💻 Online Meeting
+    <span id="meetingCount">0</span>
+</a>
+
+<<a href="history.html" class="card">
+    📋 Medical History
+    <span id="historyCount">0</span>
+</a>
+</a>
+<
+    </div>
+
+</div>
+<script>
+
+
+
+    if (sessionStorage.getItem("loggedIn") !== "true" ||
+        sessionStorage.getItem("userRole") !== "admin") {
+
+        window.location.href = "login.html";
+    }
+</script>
+
+<script>
+
+function showCriticalAlerts() {
+
+    let notifications =
+        JSON.parse(localStorage.getItem("notifications")) || [];
+
+    let alerts = notifications.filter(function(notification) {
+        return notification.type === "Emergency";
+    });
+
+    let area = document.getElementById("criticalAlerts");
+
+    if (alerts.length === 0) {
+        area.innerHTML = "<p>✅ No critical alerts</p>";
+        return;
+    }
+
+    area.innerHTML = "";
+
+    alerts.forEach(function(alert) {
+
+        let box = document.createElement("div");
+
+        box.innerHTML =
+            "🚨 <b>" + alert.patient + "</b><br>" +
+            alert.message;
+
+        area.appendChild(box);
+    });
+}
+
+showCriticalAlerts();
+
+
+function logout() {
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("userRole");
+
+    alert("Logged out successfully!");
+
+    window.location.href = "login.html";
+}
+
+</script>
+
+</script>
+
+<footer>
+    <h3>🏥 Hospital Management System</h3>
+    <p>Providing quality healthcare services</p>
+    <p>📞 Contact: 9876543210 | ✉️ Email: hospital@gmail.com</p>
+    <p>© 2026 Hospital Management System</p>
+</footer>
+</body>
+<script>
+
+function getCount(key) {
+    let data = JSON.parse(localStorage.getItem(key) || "[]");
+    return data.length;
+}
+
+window.onload = function() {
+
+    document.getElementById("doctorCount").textContent =
+        getCount("doctors");
+
+    document.getElementById("patientCount").textContent =
+        getCount("patients");
+
+    document.getElementById("appointmentCount").textContent =
+        getCount("appointments");
+
+    document.getElementById("prescriptionCount").textContent =
+        getCount("prescriptions");
+
+    document.getElementById("notificationCount").textContent =
+        getCount("notifications");
+
+    let monitoringData =
+    JSON.parse(localStorage.getItem("monitoring") || "[]");
+
+document.getElementById("monitoringCount").textContent =
+    monitoringData.length;
+
+    document.getElementById("meetingCount").textContent =
+    getCount("meetings");
+
+    document.getElementById("historyCount").textContent =
+    getCount("history");
+};
+function showEmergencyAlert() {
+
+    let notifications =
+        JSON.parse(localStorage.getItem("notifications")) || [];
+
+    let emergencies = notifications.filter(function(notification) {
+        return notification.type === "Emergency";
+    });
+
+    let alertBox = document.getElementById("emergencyAlert");
+
+    if (emergencies.length > 0) {
+        alertBox.innerHTML =
+            "🚨 <b>EMERGENCY ALERT!</b><br>" +
+            emergencies.length +
+            " critical patient alert(s) detected.";
+    } else {
+        alertBox.innerHTML =
+            "✅ No emergency alerts";
+    }
+}
+
+showEmergencyAlert();
+</script>
+
+
+
+
+</script>
+
+</script>

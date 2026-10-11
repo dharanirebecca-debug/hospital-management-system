@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Prescription Management</title>
+
+    <style>
+
+       body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f7fb;
+}
+
+.header {
+    background: #1976d2;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    padding: 25px;
+}
+
+form {
+    background: white;
+    padding: 25px;
+    max-width: 600px;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px #ccc;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    margin: 4px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #999;
+}
+
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #999;
+    text-align: center;
+}
+
+th {
+    background: #d9edf7;
+}
+
+#prescriptionDetails {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    width: 350px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #555;
+    z-index: 1000;
+}
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>💊 Prescription Management</h1>
+
+    <a href="index.html">🏠 Dashboard</a>
+
+    <hr>
+
+
+    <!-- ADD PRESCRIPTION -->
+
+    <h2>💊 Add Prescription</h2>
+
+    <form onsubmit="event.preventDefault(); handlePrescriptionSubmit();">
+
+        <label>Patient Name:</label>
+
+        <input
+            type="text"
+            id="patient"
+            required
+        >
+
+
+        <label>Doctor Name:</label>
+
+        <input
+            type="text"
+            id="doctor"
+            required
+        >
+
+
+        <label>Medicine:</label>
+
+        <input
+            type="text"
+            id="medicine"
+            required
+        >
+
+
+        <label>Dosage:</label>
+
+        <input
+            type="text"
+            id="dosage"
+            required
+        >
+
+
+        <label>Date:</label>
+
+        <input
+            type="date"
+            id="date"
+            required
+        >
+
+
+        <label>Instructions:</label>
+
+        <textarea
+            id="instructions"
+            required
+        ></textarea>
+
+
+        <button
+            type="submit"
+            id="prescriptionSubmitButton"
+        >
+            ➕ Add Prescription
+        </button>
+
+
+        <button
+            type="button"
+            id="cancelPrescriptionEditButton"
+            onclick="cancelPrescriptionEdit()"
+            style="display:none;"
+        >
+            ✖️ Cancel Edit
+        </button>
+
+    </form>
+
+
+    <!-- TOTAL -->
+
+    <p>
+
+        💊 <b>Total Prescriptions:</b>
+
+        <span id="prescriptionTotal">0</span>
+
+    </p>
+
+
+    <!-- PRESCRIPTION LIST -->
+
+    <h2>📋 Prescription List</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Patient</th>
+
+                <th>Doctor</th>
+
+                <th>Medicine</th>
+
+                <th>Dosage</th>
+
+                <th>Date</th>
+
+                <th>Instructions</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="prescriptionList"></tbody>
+
+    </table>
+
+
+    <!-- VIEW POPUP -->
+
+    <div id="prescriptionDetails">
+
+        <h2>💊 Prescription Details</h2>
+
+
+        <p>
+            <b>Patient:</b>
+            <span id="viewPrescriptionPatient"></span>
+        </p>
+
+
+        <p>
+            <b>Doctor:</b>
+            <span id="viewPrescriptionDoctor"></span>
+        </p>
+
+
+        <p>
+            <b>Medicine:</b>
+            <span id="viewPrescriptionMedicine"></span>
+        </p>
+
+
+        <p>
+            <b>Dosage:</b>
+            <span id="viewPrescriptionDosage"></span>
+        </p>
+
+
+        <p>
+            <b>Date:</b>
+            <span id="viewPrescriptionDate"></span>
+        </p>
+
+
+        <p>
+            <b>Instructions:</b>
+            <span id="viewPrescriptionInstructions"></span>
+        </p>
+
+
+        <button
+            type="button"
+            onclick="closePrescriptionDetails()"
+        >
+            ✖️ Close
+        </button>
+
+    </div>
+
+
+
+<script>
+
+
+let editingPrescriptionIndex = -1;
+
+
+
+// ==========================================
+// HANDLE FORM
+// ==========================================
+
+function handlePrescriptionSubmit() {
+
+    if (editingPrescriptionIndex === -1) {
+
+        addPrescription();
+
+    } else {
+
+        updatePrescription();
+
+    }
+
+}
+
+
+
+// ==========================================
+// ADD PRESCRIPTION
+// ==========================================
+
+function addPrescription() {
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let medicine =
+        document.getElementById("medicine").value.trim();
+
+    let dosage =
+        document.getElementById("dosage").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let instructions =
+        document.getElementById("instructions").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        medicine === "" ||
+        dosage === "" ||
+        date === "" ||
+        instructions === ""
+    ) {
+
+        alert("Please fill all prescription details!");
+
+        return;
+    }
+
+
+    let prescriptions =
+        JSON.parse(
+            localStorage.getItem("prescriptions")
+        ) || [];
+
+
+    prescriptions.push({
+
+        patient: patient,
+
+        doctor: doctor,
+
+        medicine: medicine,
+
+        dosage: dosage,
+
+        date: date,
+
+        instructions: instructions
+
+    });
+
+
+    localStorage.setItem(
+        "prescriptions",
+        JSON.stringify(prescriptions)
+    );
+
+
+    resetPrescriptionForm();
+
+    displayPrescriptions();
+
+
+    alert("💊 Prescription added successfully!");
+
+}
+
+
+
+// ==========================================
+// DISPLAY PRESCRIPTIONS
+// ==========================================
+
+function displayPrescriptions() {
+
+    let prescriptions =
+        JSON.parse(
+            localStorage.getItem("prescriptions")
+        ) || [];
+
+
+    document.getElementById(
+        "prescriptionTotal"
+    ).textContent =
+        prescriptions.length;
+
+
+    let list =
+        document.getElementById(
+            "prescriptionList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    prescriptions.forEach(
+        function(prescription, index) {
+
+
+            let row =
+                list.insertRow();
+
+
+            row.insertCell(0).textContent =
+                prescription.patient || "";
+
+
+            row.insertCell(1).textContent =
+                prescription.doctor || "";
+
+
+            row.insertCell(2).textContent =
+                prescription.medicine || "";
+
+
+            row.insertCell(3).textContent =
+                prescription.dosage || "";
+
+
+            row.insertCell(4).textContent =
+                prescription.date || "";
+
+
+            row.insertCell(5).textContent =
+                prescription.instructions || "";
+
+
+            let actionCell =
+                row.insertCell(6);
+
+
+            actionCell.innerHTML =
+
+                '<button type="button" onclick="viewPrescription(' +
+                index +
+                ')">👁️ View</button> ' +
+
+                '<button type="button" onclick="editPrescription(' +
+                index +
+                ')">✏️ Edit</button> ' +
+
+                '<button type="button" onclick="deletePrescription(' +
+                index +
+                ')">🗑️ Delete</button>';
+
+        }
+    );
+
+}
+
+
+
+// ==========================================
+// VIEW PRESCRIPTION
+// ==========================================
+
+function viewPrescription(index) {
+
+    let prescriptions =
+        JSON.parse(
+            localStorage.getItem("prescriptions")
+        ) || [];
+
+
+    let prescription =
+        prescriptions[index];
+
+
+    if (!prescription) {
+
+        alert("Prescription not found!");
+
+        return;
+    }
+
+
+    document.getElementById(
+        "viewPrescriptionPatient"
+    ).textContent =
+        prescription.patient || "";
+
+
+    document.getElementById(
+        "viewPrescriptionDoctor"
+    ).textContent =
+        prescription.doctor || "";
+
+
+    document.getElementById(
+        "viewPrescriptionMedicine"
+    ).textContent =
+        prescription.medicine || "";
+
+
+    document.getElementById(
+        "viewPrescriptionDosage"
+    ).textContent =
+        prescription.dosage || "";
+
+
+    document.getElementById(
+        "viewPrescriptionDate"
+    ).textContent =
+        prescription.date || "";
+
+
+    document.getElementById(
+        "viewPrescriptionInstructions"
+    ).textContent =
+        prescription.instructions || "";
+
+
+    document.getElementById(
+        "prescriptionDetails"
+    ).style.display =
+        "block";
+
+}
+
+
+
+// ==========================================
+// CLOSE VIEW
+// ==========================================
+
+function closePrescriptionDetails() {
+
+    document.getElementById(
+        "prescriptionDetails"
+    ).style.display =
+        "none";
+
+}
+
+
+
+// ==========================================
+// EDIT PRESCRIPTION
+// ==========================================
+
+function editPrescription(index) {
+
+    let prescriptions =
+        JSON.parse(
+            localStorage.getItem("prescriptions")
+        ) || [];
+
+
+    let prescription =
+        prescriptions[index];
+
+
+    if (!prescription) {
+
+        alert("Prescription not found!");
+
+        return;
+    }
+
+
+    document.getElementById("patient").value =
+        prescription.patient || "";
+
+
+    document.getElementById("doctor").value =
+        prescription.doctor || "";
+
+
+    document.getElementById("medicine").value =
+        prescription.medicine || "";
+
+
+    document.getElementById("dosage").value =
+        prescription.dosage || "";
+
+
+    document.getElementById("date").value =
+        prescription.date || "";
+
+
+    document.getElementById("instructions").value =
+        prescription.instructions || "";
+
+
+    editingPrescriptionIndex = index;
+
+
+    document.getElementById(
+        "prescriptionSubmitButton"
+    ).textContent =
+        "✏️ Update Prescription";
+
+
+    document.getElementById(
+        "cancelPrescriptionEditButton"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+
+// ==========================================
+// UPDATE PRESCRIPTION
+// ==========================================
+
+function updatePrescription() {
+
+    let prescriptions =
+        JSON.parse(
+            localStorage.getItem("prescriptions")
+        ) || [];
+
+
+    if (!prescriptions[editingPrescriptionIndex]) {
+
+        alert("Prescription not found!");
+
+        return;
+    }
+
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let medicine =
+        document.getElementById("medicine").value.trim();
+
+    let dosage =
+        document.getElementById("dosage").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let instructions =
+        document.getElementById("instructions").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        medicine === "" ||
+        dosage === "" ||
+        date === "" ||
+        instructions === ""
+    ) {
+
+        alert("Please fill all prescription details!");
+
+        return;
+    }
+
+
+    prescriptions[editingPrescriptionIndex] = {
+
+        patient: patient,
+
+        doctor: doctor,
+
+        medicine: medicine,
+
+        dosage: dosage,
+
+        date: date,
+
+        instructions: instructions
+
+    };
+
+
+    localStorage.setItem(
+        "prescriptions",
+        JSON.stringify(prescriptions)
+    );
+
+
+    resetPrescriptionForm();
+
+    displayPrescriptions();
+
+
+    alert("✏️ Prescription updated successfully!");
+
+}
+
+
+
+// ==========================================
+// CANCEL EDIT
+// ==========================================
+
+function cancelPrescriptionEdit() {
+
+    resetPrescriptionForm();
+
+}
+
+
+
+// ==========================================
+// RESET FORM
+// ==========================================
+
+function resetPrescriptionForm() {
+
+    document.getElementById("patient").value = "";
+
+    document.getElementById("doctor").value = "";
+
+    document.getElementById("medicine").value = "";
+
+    document.getElementById("dosage").value = "";
+
+    document.getElementById("date").value = "";
+
+    document.getElementById("instructions").value = "";
+
+
+    editingPrescriptionIndex = -1;
+
+
+    document.getElementById(
+        "prescriptionSubmitButton"
+    ).textContent =
+        "➕ Add Prescription";
+
+
+    document.getElementById(
+        "cancelPrescriptionEditButton"
+    ).style.display =
+        "none";
+
+}
+
+
+
+// ==========================================
+// DELETE PRESCRIPTION
+// ==========================================
+
+function deletePrescription(index) {
+
+    let prescriptions =
+        JSON.parse(
+            localStorage.getItem("prescriptions")
+        ) || [];
+
+
+    if (!prescriptions[index]) {
+
+        alert("Prescription not found!");
+
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this prescription?"
+        )
+    ) {
+
+        return;
+    }
+
+
+    prescriptions.splice(index, 1);
+
+
+    localStorage.setItem(
+        "prescriptions",
+        JSON.stringify(prescriptions)
+    );
+
+
+    displayPrescriptions();
+
+
+    alert("🗑️ Prescription deleted successfully!");
+
+}
+
+
+
+// ==========================================
+// LOAD PRESCRIPTIONS
+// ==========================================
+
+displayPrescriptions();
+
+
+</script>
+
+
+</body>
+</html>

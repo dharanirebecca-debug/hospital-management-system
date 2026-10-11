@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Online Meeting Management</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            box-shadow: 0 0 8px #ccc;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 9px;
+            margin-top: 5px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 9px 15px;
+            margin: 3px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #999;
+            text-align: left;
+        }
+
+        th {
+            background: #d9edf7;
+        }
+
+        #meetingDetails {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #555;
+            width: 350px;
+            z-index: 1000;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>💻 Online Meeting Management</h1>
+
+<a href="index.html">🏠 Dashboard</a>
+
+<hr>
+
+
+<h2>💻 Schedule Online Meeting</h2>
+
+<form onsubmit="event.preventDefault(); handleMeetingSubmit();">
+
+    <label>Patient Name:</label>
+
+    <input
+        type="text"
+        id="patient"
+        required
+    >
+
+
+    <label>Doctor Name:</label>
+
+    <input
+        type="text"
+        id="doctor"
+        required
+    >
+
+
+    <label>Meeting Date:</label>
+
+    <input
+        type="date"
+        id="date"
+        required
+    >
+
+
+    <label>Meeting Time:</label>
+
+    <input
+        type="time"
+        id="time"
+        required
+    >
+
+
+    <label>Meeting Link:</label>
+
+    <input
+        type="url"
+        id="meetingLink"
+        placeholder="https://example.com/meeting"
+        required
+    >
+
+
+    <button
+        type="submit"
+        id="meetingSubmitButton"
+    >
+        ➕ Schedule Meeting
+    </button>
+
+
+    <button
+        type="button"
+        id="cancelMeetingEditButton"
+        onclick="cancelMeetingEdit()"
+        style="display:none;"
+    >
+        ✖️ Cancel Edit
+    </button>
+
+</form>
+
+
+<p>
+
+    💻 <b>Total Meetings:</b>
+
+    <span id="meetingTotal">0</span>
+
+</p>
+
+
+<h2>📋 Meeting List</h2>
+
+<table>
+
+    <thead>
+
+        <tr>
+
+            <th>Patient</th>
+
+            <th>Doctor</th>
+
+            <th>Date</th>
+
+            <th>Time</th>
+
+            <th>Meeting Link</th>
+
+            <th>Action</th>
+
+        </tr>
+
+    </thead>
+
+
+    <tbody id="meetingList"></tbody>
+
+</table>
+
+
+<!-- VIEW POPUP -->
+
+<div id="meetingDetails">
+
+    <h2>💻 Meeting Details</h2>
+
+    <p>
+        <b>Patient:</b>
+        <span id="viewMeetingPatient"></span>
+    </p>
+
+    <p>
+        <b>Doctor:</b>
+        <span id="viewMeetingDoctor"></span>
+    </p>
+
+    <p>
+        <b>Date:</b>
+        <span id="viewMeetingDate"></span>
+    </p>
+
+    <p>
+        <b>Time:</b>
+        <span id="viewMeetingTime"></span>
+    </p>
+
+    <p>
+        <b>Meeting Link:</b>
+        <span id="viewMeetingLink"></span>
+    </p>
+
+    <button
+        type="button"
+        onclick="closeMeetingDetails()"
+    >
+        ✖️ Close
+    </button>
+
+</div>
+
+
+<script>
+
+let editingMeetingIndex = -1;
+
+
+// ==========================================
+// HANDLE FORM
+// ==========================================
+
+function handleMeetingSubmit() {
+
+    if (editingMeetingIndex === -1) {
+
+        addMeeting();
+
+    } else {
+
+        updateMeeting();
+
+    }
+
+}
+
+
+// ==========================================
+// ADD MEETING
+// ==========================================
+
+function addMeeting() {
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let time =
+        document.getElementById("time").value;
+
+    let meetingLink =
+        document.getElementById("meetingLink").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        date === "" ||
+        time === "" ||
+        meetingLink === ""
+    ) {
+
+        alert("Please fill all meeting details!");
+
+        return;
+    }
+
+
+    let meetings =
+        JSON.parse(
+            localStorage.getItem("meetings")
+        ) || [];
+
+
+    meetings.push({
+
+        patient: patient,
+
+        doctor: doctor,
+
+        date: date,
+
+        time: time,
+
+        meetingLink: meetingLink
+
+    });
+
+
+    localStorage.setItem(
+        "meetings",
+        JSON.stringify(meetings)
+    );
+
+
+    resetMeetingForm();
+
+    displayMeetings();
+
+
+    alert("💻 Online meeting scheduled successfully!");
+
+}
+
+
+// ==========================================
+// DISPLAY MEETINGS
+// ==========================================
+
+function displayMeetings() {
+
+    let meetings =
+        JSON.parse(
+            localStorage.getItem("meetings")
+        ) || [];
+
+
+    document.getElementById(
+        "meetingTotal"
+    ).textContent =
+        meetings.length;
+
+
+    let list =
+        document.getElementById(
+            "meetingList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    meetings.forEach(
+        function(meeting, index) {
+
+            let row =
+                list.insertRow();
+
+
+            row.insertCell(0).textContent =
+                meeting.patient || "";
+
+
+            row.insertCell(1).textContent =
+                meeting.doctor || "";
+
+
+            row.insertCell(2).textContent =
+                meeting.date || "";
+
+
+            row.insertCell(3).textContent =
+                meeting.time || "";
+
+
+            let linkCell =
+                row.insertCell(4);
+
+
+            if (meeting.meetingLink) {
+
+                linkCell.innerHTML =
+                    '<a href="' +
+                    meeting.meetingLink +
+                    '" target="_blank">🔗 Join Meeting</a>';
+
+            } else {
+
+                linkCell.textContent = "";
+
+            }
+
+
+            let actionCell =
+                row.insertCell(5);
+
+
+            actionCell.innerHTML =
+
+                '<button type="button" onclick="viewMeeting(' +
+                index +
+                ')">👁️ View</button> ' +
+
+                '<button type="button" onclick="editMeeting(' +
+                index +
+                ')">✏️ Edit</button> ' +
+
+                '<button type="button" onclick="deleteMeeting(' +
+                index +
+                ')">🗑️ Delete</button>';
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// VIEW MEETING
+// ==========================================
+
+function viewMeeting(index) {
+
+    let meetings =
+        JSON.parse(
+            localStorage.getItem("meetings")
+        ) || [];
+
+
+    let meeting =
+        meetings[index];
+
+
+    if (!meeting) {
+
+        alert("Meeting not found!");
+
+        return;
+    }
+
+
+    document.getElementById(
+        "viewMeetingPatient"
+    ).textContent =
+        meeting.patient || "";
+
+
+    document.getElementById(
+        "viewMeetingDoctor"
+    ).textContent =
+        meeting.doctor || "";
+
+
+    document.getElementById(
+        "viewMeetingDate"
+    ).textContent =
+        meeting.date || "";
+
+
+    document.getElementById(
+        "viewMeetingTime"
+    ).textContent =
+        meeting.time || "";
+
+
+    let link =
+        document.getElementById(
+            "viewMeetingLink"
+        );
+
+
+    link.innerHTML = "";
+
+
+    if (meeting.meetingLink) {
+
+        let a =
+            document.createElement("a");
+
+        a.href =
+            meeting.meetingLink;
+
+        a.target =
+            "_blank";
+
+        a.textContent =
+            "🔗 Join Meeting";
+
+        link.appendChild(a);
+
+    }
+
+
+    document.getElementById(
+        "meetingDetails"
+    ).style.display =
+        "block";
+
+}
+
+
+// ==========================================
+// CLOSE VIEW
+// ==========================================
+
+function closeMeetingDetails() {
+
+    document.getElementById(
+        "meetingDetails"
+    ).style.display =
+        "none";
+
+}
+
+
+// ==========================================
+// EDIT MEETING
+// ==========================================
+
+function editMeeting(index) {
+
+    let meetings =
+        JSON.parse(
+            localStorage.getItem("meetings")
+        ) || [];
+
+
+    let meeting =
+        meetings[index];
+
+
+    if (!meeting) {
+
+        alert("Meeting not found!");
+
+        return;
+    }
+
+
+    document.getElementById("patient").value =
+        meeting.patient || "";
+
+
+    document.getElementById("doctor").value =
+        meeting.doctor || "";
+
+
+    document.getElementById("date").value =
+        meeting.date || "";
+
+
+    document.getElementById("time").value =
+        meeting.time || "";
+
+
+    document.getElementById("meetingLink").value =
+        meeting.meetingLink || "";
+
+
+    editingMeetingIndex = index;
+
+
+    document.getElementById(
+        "meetingSubmitButton"
+    ).textContent =
+        "✏️ Update Meeting";
+
+
+    document.getElementById(
+        "cancelMeetingEditButton"
+    ).style.display =
+        "inline-block";
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+// ==========================================
+// UPDATE MEETING
+// ==========================================
+
+function updateMeeting() {
+
+    let meetings =
+        JSON.parse(
+            localStorage.getItem("meetings")
+        ) || [];
+
+
+    if (!meetings[editingMeetingIndex]) {
+
+        alert("Meeting not found!");
+
+        return;
+    }
+
+
+    let patient =
+        document.getElementById("patient").value.trim();
+
+    let doctor =
+        document.getElementById("doctor").value.trim();
+
+    let date =
+        document.getElementById("date").value;
+
+    let time =
+        document.getElementById("time").value;
+
+    let meetingLink =
+        document.getElementById("meetingLink").value.trim();
+
+
+    if (
+        patient === "" ||
+        doctor === "" ||
+        date === "" ||
+        time === "" ||
+        meetingLink === ""
+    ) {
+
+        alert("Please fill all meeting details!");
+
+        return;
+    }
+
+
+    meetings[editingMeetingIndex] = {
+
+        patient: patient,
+
+        doctor: doctor,
+
+        date: date,
+
+        time: time,
+
+        meetingLink: meetingLink
+
+    };
+
+
+    localStorage.setItem(
+        "meetings",
+        JSON.stringify(meetings)
+    );
+
+
+    resetMeetingForm();
+
+    displayMeetings();
+
+
+    alert("✏️ Meeting updated successfully!");
+
+}
+
+
+// ==========================================
+// CANCEL EDIT
+// ==========================================
+
+function cancelMeetingEdit() {
+
+    resetMeetingForm();
+
+}
+
+
+// ==========================================
+// RESET FORM
+// ==========================================
+
+function resetMeetingForm() {
+
+    document.getElementById("patient").value = "";
+
+    document.getElementById("doctor").value = "";
+
+    document.getElementById("date").value = "";
+
+    document.getElementById("time").value = "";
+
+    document.getElementById("meetingLink").value = "";
+
+
+    editingMeetingIndex = -1;
+
+
+    document.getElementById(
+        "meetingSubmitButton"
+    ).textContent =
+        "➕ Schedule Meeting";
+
+
+    document.getElementById(
+        "cancelMeetingEditButton"
+    ).style.display =
+        "none";
+
+}
+
+
+// ==========================================
+// DELETE MEETING
+// ==========================================
+
+function deleteMeeting(index) {
+
+    let meetings =
+        JSON.parse(
+            localStorage.getItem("meetings")
+        ) || [];
+
+
+    if (!meetings[index]) {
+
+        alert("Meeting not found!");
+
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this meeting?"
+        )
+    ) {
+
+        return;
+    }
+
+
+    meetings.splice(index, 1);
+
+
+    localStorage.setItem(
+        "meetings",
+        JSON.stringify(meetings)
+    );
+
+
+    displayMeetings();
+
+
+    alert("🗑️ Meeting deleted successfully!");
+
+}
+
+
+// ==========================================
+// LOAD MEETINGS
+// ==========================================
+
+displayMeetings();
+
+</script>
+
+</body>
+</html>

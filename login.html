@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System - Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #e3f2fd, #f3e5f5);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 360px;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        h1 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #444;
+            margin-bottom: 25px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #1976d2;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0d47a1;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .register-link {
+            margin-top: 20px;
+            display: block;
+            color: #1976d2;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <h1>🏥</h1>
+    <h2>Hospital Management System</h2>
+
+    <form onsubmit="loginUser(event)">
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Enter Username"
+            required
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Enter Password"
+            required
+        >
+
+        <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="doctor">Doctor</option>
+            <option value="patient">Patient</option>
+        </select>
+
+        <button type="submit">🔐 Login</button>
+
+    </form>
+
+    <p id="message"></p>
+
+    <a href="register.html" class="register-link">
+        📝 New User? Register Here
+    </a>
+
+</div>
+
+<script>
+
+function loginUser(event) {
+
+    event.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("role").value;
+
+    const message = document.getElementById("message");
+
+    message.textContent = "";
+    message.style.color = "red";
+
+    // =========================
+    // ADMIN LOGIN
+    // =========================
+
+    if (
+        role === "admin" &&
+        username === "admin" &&
+        password === "admin123"
+    ) {
+
+        sessionStorage.setItem("loggedIn", "true");
+        sessionStorage.setItem("userRole", "admin");
+
+        message.style.color = "green";
+        message.textContent = "✅ Admin login successful!";
+
+        setTimeout(function() {
+            window.location.href = "index.html";
+        }, 500);
+
+        return;
+    }
+
+
+    // =========================
+    // REGISTERED USER LOGIN
+    // =========================
+
+    const registeredUsers =
+        JSON.parse(localStorage.getItem("registeredUsers")) || [];
+
+    const user = registeredUsers.find(function(account) {
+
+        return (
+            account.username === username &&
+            account.password === password &&
+            account.role === role
+        );
+
+    });
+
+
+    // =========================
+    // USER FOUND
+    // =========================
+
+    if (user) {
+
+        sessionStorage.setItem("loggedIn", "true");
+        sessionStorage.setItem("userRole", user.role);
+
+        sessionStorage.setItem("patientName", user.name);
+        sessionStorage.setItem("patientUsername", user.username);
+
+        // DOCTOR LOGIN
+        if (user.role === "doctor") {
+
+            message.style.color = "green";
+            message.textContent = "✅ Doctor login successful!";
+
+            setTimeout(function() {
+                window.location.href = "doctor-dashboard.html";
+            }, 500);
+
+            return;
+        }
+
+
+        // PATIENT LOGIN
+        if (user.role === "patient") {
+
+            message.style.color = "green";
+            message.textContent = "✅ Patient login successful!";
+
+            setTimeout(function() {
+                window.location.href = "patient-dashboard.html";
+            }, 500);
+
+            return;
+        }
+
+    }
+
+
+    // =========================
+    // INVALID LOGIN
+    // =========================
+
+    message.style.color = "red";
+    message.textContent = "❌ Incorrect username, password or role.";
+
+}
+
+</script>
+
+</body>
+</html>
