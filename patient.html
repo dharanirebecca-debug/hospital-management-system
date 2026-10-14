@@ -71,18 +71,20 @@
 </head>
 
 <body>
-    <script>
-    if (
-        sessionStorage.getItem("loggedIn") !== "true" ||
-        sessionStorage.getItem("userRole") !== "patient"
-    ) {
-        window.location.href = "login.html";
-    }
+ <script>
+   
+if (
+    sessionStorage.getItem("loggedIn") !== "true" ||
+    !["doctor", "admin"].includes(sessionStorage.getItem("userRole"))
+) {
+    window.location.href = "login.html";
+}
+
 </script>
 
 <h1>👤 Patient Management</h1>
 
-<a href="index.html">🏠 Dashboard</a>
+<a href="doctor-dashboard.html">🏠 Dashboard</a>
 
 <hr>
 
